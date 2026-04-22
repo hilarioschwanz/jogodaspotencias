@@ -3,48 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZELAYCE - Jogo das Potências</title>
+    <title>Batalha das Potências</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #game-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; border: 4px solid #007bff; }
-        h1 { color: #007bff; font-size: 24px; margin-bottom: 20px; }
-        #display-area { font-size: 48px; font-weight: bold; margin: 20px 0; color: #333; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 15px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; background-color: #007bff; color: white; transition: 0.3s; }
-        button:hover { background-color: #0056b3; transform: scale(1.05); }
-        #feedback { margin-top: 15px; font-weight: bold; min-height: 20px; }
+        :root { 
+            --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
+            --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
+        }
+        * { box-sizing: border-box; transition: background 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
+
+        /* BANNERS */
+        .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
+        .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; transition: opacity 0.8s; visibility: hidden; }
+        .slide.active { opacity: 1; visibility: visible; z-index: 5; }
+        .slide img { height: 80px; width: 80px; object-fit: cover; border-radius: 12px; margin-right: 20px; border: 2px solid var(--gold); }
+        .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; text-transform: uppercase; }
+        .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; line-height: 1.3; }
+
+        /* JOGO */
+        .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; width: 100%; max-width: 500px; z-index: 10; }
+        .avatar-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
+        .avatar-option.selected { border-color: var(--accent); background: #fff0f1; transform: scale(1.1); }
+        
+        .power-display { font-size: clamp(3.5rem, 12vh, 5.5rem); font-weight: 900; color: var(--primary); margin: 20px 0; }
+        .power-display sup { font-size: 0.6em; color: var(--accent); }
+
+        #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; background: #fdfdfd; color: var(--dark); }
+        .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; font-size: 1rem; }
+        
+        .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
+        
+        #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; color: #333; }
+        .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: 600; }
+
+        footer { margin-top: 40px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
+        #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 25px; z-index: 2000; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
+        .admin-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <h1>Desafio de Potências</h1>
-    <div id="display-area">2³</div>
-    
-    <div class="options">
-        <button onclick="checkAnswer(this)">6</button>
-        <button onclick="checkAnswer(this)">8</button>
-        <button onclick="checkAnswer(this)">9</button>
-        <button onclick="checkAnswer(this)">12</button>
+    <div class="banner-wrapper" id="banner-area"></div>
+
+    <div id="setup-screen" class="card">
+        <div id="ranking-box">
+            <h2 style="color:var(--primary)">🏆 TOP POTÊNCIAS</h2>
+            <div id="ranking-list"></div>
+            <button class="btn-main" onclick="document.getElementById('ranking-box').style.display='none'" style="background:#888">VOLTAR</button>
+        </div>
+
+        <strong style="color:var(--accent)">👨‍🏫 Professor Hilário</strong>
+        <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
+        
+        <input type="text" id="nome-aluno" placeholder="Nome do Guerreiro" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;" oninput="validarProgresso()">
+        
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selAvatar(this, '⚔️')">⚔️</div>
+            <div class="avatar-option" onclick="selAvatar(this, '🧙')">🧙</div>
+            <div class="avatar-option" onclick="selAvatar(this, '⚡')">⚡</div>
+            <div class="avatar-option" onclick="selAvatar(this, '🔥')">🔥</div>
+        </div>
+
+        <div id="lvls" style="margin-top: 10px;">
+            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>Nível 1 (Fácil)</span> <span id="l0">🔓</span></div>
+            <div class="lvl-btn" id="btn-1" onclick="selecionarNivel(1)"><span>Nível 2</span> <span id="l1">🔒</span></div>
+            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>Nível 3 (Médio)</span> <span id="l2">🔒</span></div>
+            <div class="lvl-btn" id="btn-3" onclick="selecionarNivel(3)"><span>Nível 4</span> <span id="l3">🔒</span></div>
+            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>Nível 5 (Mestre)</span> <span id="l4">🔒</span></div>
+        </div>
+
+        <button class="btn-main" onclick="tentarIniciar()">INICIAR JOGO</button>
+        <button class="btn-main" style="background:var(--gold); color:var(--dark)" onclick="verRanking()">🏆 RANKING</button>
     </div>
-    
-    <div id="feedback"></div>
-</div>
 
-<script>
-    // Aqui deves inserir a lógica do jogo (JavaScript) que fizemos antes
-    // Exemplo de como a lógica se conecta com a estrutura:
-    function checkAnswer(btn) {
-        const feedback = document.getElementById('feedback');
-        if(btn.innerText === "8") {
-            feedback.innerText = "Correto! 🎉";
-            feedback.style.color = "green";
-        } else {
-            feedback.innerText = "Tenta novamente! ❌";
-            feedback.style.color = "red";
+    <div id="game-screen" class="card" style="display:none;">
+        <div id="life-container" style="width:100%; background:#eee; height:15px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
+            <div id="life-bar" style="width:100%; height:100%; background:var(--success); transition:0.3s"></div>
+        </div>
+        <div style="display:flex; justify-content: space-between;">
+            <span id="player-tag" style="font-size:2rem"></span>
+            <h2 id="time-txt" style="color:var(--primary); margin:0; font-size: 2rem;">--</h2>
+        </div>
+        <div id="q-box" class="power-display">?<sup>?</sup></div>
+        <input type="number" id="ans" inputmode="numeric">
+        <button class="btn-main" onclick="check()">ATACAR!</button>
+    </div>
+
+    <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
+
+    <div id="admin-panel">
+        <h3>Configurar Banners</h3>
+        <select id="ad-slot" class="admin-input" onchange="carregarCamposAdmin()">
+            <option value="1">Patrocinador 1</option>
+            <option value="2">Patrocinador 2</option>
+            <option value="3">Patrocinador 3</option>
+        </select>
+        <input type="text" id="ad-title" placeholder="Nome" class="admin-input">
+        <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
+        <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link (Instagram/WhatsApp)" class="admin-input">
+        <button class="btn-main" onclick="salvarGeral()">SALVAR</button>
+        <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
+    </div>
+
+    <script>
+        let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
+        
+        // Configuração dos 5 níveis: [Tempo por questão, Dano por erro, Base Máxima, Expoente Máximo]
+        const conf = [
+            {t: 12, d: 20, bm: 5, em: 2}, // Nível 1: Bases até 5, expoente 2
+            {t: 10, d: 25, bm: 10, em: 2}, // Nível 2: Bases até 10, expoente 2
+            {t: 10, d: 25, bm: 5, em: 3}, // Nível 3: Bases até 5, expoente 3
+            {t: 8, d: 34, bm: 12, em: 2}, // Nível 4: Bases até 12, expoente 2
+            {t: 8, d: 34, bm: 10, em: 3}  // Nível 5: Bases até 10, expoente 3
+        ];
+
+        function renderBanners() {
+            const area = document.getElementById('banner-area');
+            let h = '';
+            for(let i=1; i<=3; i++) {
+                const d = JSON.parse(localStorage.getItem('p_ad_'+i)) || { title: "Vazio", desc: "Anuncie Aqui", url: "", link: "#" };
+                h += `<div class="slide ${i===1?'active':''}" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
+            }
+            area.innerHTML = h;
+            setInterval(() => {
+                const s = document.querySelectorAll('.slide');
+                if(!s.length) return;
+                s[slideIdx].classList.remove('active');
+                slideIdx = (slideIdx + 1) % s.length;
+                s[slideIdx].classList.add('active');
+            }, 5000);
         }
-    }
-</script>
 
+        function abrirAdmin() { if(prompt("Senha:") === "Food2024@") document.getElementById('admin-panel').style.display='block'; }
+        function carregarCamposAdmin() {
+            const slot = document.getElementById('ad-slot').value;
+            const d = JSON.parse(localStorage.getItem('p_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
+            document.getElementById('ad-title').value = d.title;
+            document.getElementById('ad-desc').value = d.desc;
+            document.getElementById('ad-img').value = d.url;
+            document.getElementById('ad-link').value = d.link;
+        }
+        function salvarGeral() {
+            const slot = document.getElementById('ad-slot').value;
+            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
+            localStorage.setItem('p_ad_'+slot, JSON.stringify(obj)); location.reload();
+        }
+
+        function validarProgresso() {
+            const n = document.getElementById('nome-aluno').value.trim();
+            const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
+            for(let i=1; i<=4; i++) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒";
+        }
+
+        function selecionarNivel(l) {
+            const n = document.getElementById('nome-aluno').value.trim();
+            if(!n) return alert("Digite seu nome!");
+            const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
+            if(l > p) return alert("Vença o nível anterior!");
+            curLvl = l;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
+            document.getElementById('btn-'+l).style.background = "#eee";
+        }
+
+        function tentarIniciar() {
+            if(document.getElementById('nome-aluno').value.length < 3) return alert("Nome!");
+            document.getElementById('setup-screen').style.display='none';
+            document.getElementById('game-screen').style.display='block';
+            document.getElementById('player-tag').innerText = avatarSel;
+            vida=100; acertos=0; tentativas=0; ativo=true;
+            rodar();
+        }
+
+        function rodar() {
+            if(!ativo) return;
+            let base = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
+            let exp = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
+            res = Math.pow(base, exp);
+            document.getElementById('q-box').innerHTML = `${base}<sup>${exp}</sup>`;
+            document.getElementById('ans').value = ""; document.getElementById('ans').focus();
+            
+            clearInterval(crono); tempo = conf[curLvl].t;
+            document.getElementById('time-txt').innerText = tempo+"s";
+            crono = setInterval(() => {
+                tempo--; document.getElementById('time-txt').innerText = tempo+"s";
+                if(tempo <= 0) { vida -= conf[curLvl].d; atualizarVida(); if(vida <= 0) finalizar(); else rodar(); }
+            }, 1000);
+        }
+
+        function check() {
+            let v = parseInt(document.getElementById('ans').value); if(isNaN(v)) return;
+            tentativas++;
+            if(v === res) { acertos++; }
+            else { vida -= conf[curLvl].d; }
+            atualizarVida();
+            if(vida <= 0 || tentativas >= 15) finalizar(); else rodar();
+        }
+
+        function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
+
+        function finalizar() {
+            ativo = false; clearInterval(crono);
+            const n = document.getElementById('nome-aluno').value.trim();
+            const ef = Math.round((acertos/tentativas)*100) || 0;
+            
+            let r = JSON.parse(localStorage.getItem('p_rank')) || [];
+            r.push({nome: n, avatar: avatarSel, efic: ef, lvl: (curLvl+1)});
+            r.sort((a,b) => b.efic - a.efic);
+            localStorage.setItem('p_rank', JSON.stringify(r.slice(0,10)));
+
+            if(vida > 0) {
+                const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
+                if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
+                if(curLvl === 4 && ef >= 80) confetti();
+            }
+            alert(`Fim! Eficiência: ${ef}%`); location.reload();
+        }
+
+        function verRanking() {
+            const r = JSON.parse(localStorage.getItem('p_rank')) || [];
+            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes!";
+            document.getElementById('ranking-box').style.display='block';
+        }
+
+        function selAvatar(el, icon) { document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); avatarSel = icon; }
+        window.onload = renderBanners;
+        document.addEventListener("keydown", (e) => { if(e.key === "Enter" && ativo) check(); });
+    </script>
 </body>
 </html>
