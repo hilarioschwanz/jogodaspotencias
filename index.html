@@ -178,7 +178,7 @@
 
         function rodar() {
             if(!ativo) return;
-            clearInterval(crono); // Garantia de que nenhum cronômetro anterior está rodando
+            clearInterval(crono);
             
             let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
             let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
@@ -210,7 +210,7 @@
             let v = parseInt(input.value);
             if(isNaN(v)) return;
             
-            clearInterval(crono); // Para o tempo na hora que apertou Enter/Botão
+            clearInterval(crono); 
             tentativas++;
 
             if(v === res) { 
@@ -226,12 +226,14 @@
 
             atualizarVida();
             
-            // Verifica se o jogo deve acabar ou carregar a próxima imediatamente
-            if(vida <= 0 || tentativas >= 15) {
-                finalizar();
-            } else {
-                rodar(); 
-            }
+            // PEQUENO TIMEOUT PARA GARANTIR QUE O NAVEGADOR PROCESSE A PRÓXIMA QUESTÃO
+            setTimeout(() => {
+                if(vida <= 0 || tentativas >= 15) {
+                    finalizar();
+                } else {
+                    rodar(); 
+                }
+            }, 50);
         }
 
         function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
