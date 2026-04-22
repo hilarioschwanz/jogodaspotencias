@@ -25,7 +25,6 @@
         .btn-main:hover { transform: scale(0.98); }
         .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; transition: all 0.2s; }
         .lvl-btn:hover { border-color: var(--accent); }
-        .lvl-selected { background: #e94560 !important; color: white !important; border-color: var(--accent); }
         .power-display { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; }
         #ans:focus { outline: none; border-color: var(--accent); }
@@ -59,12 +58,6 @@
         
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
         footer:hover { color: var(--gold); }
-        
-        .feedback { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; color: white; font-weight: bold; z-index: 10000; animation: slideIn 0.3s ease; }
-        .feedback-success { background: var(--success); }
-        .feedback-error { background: var(--danger); }
-        
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 9999; }
         .visual-indicator.show { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
@@ -146,19 +139,19 @@
     </div>
 
     <script>
-        // ========== CONFIGURAÇÕES DO JOGO ==========
-        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, slideIdx = 0;
+        // ========== CONFIGURAÇÕES DO JOGO (EXATAMENTE IGUAIS AO ORIGINAL) ==========
+        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, tentativas = 0, slideIdx = 0;
         let nomeJogador = "", tempoInicio = 0, timerInterval = null;
         let voiceEnabled = true, synthesis = window.speechSynthesis, selectedVoice = null;
         let slotSelecionadoAdmin = 1;
         
-        // Configuração dos níveis - cada nível tem base e expoente maiores
+        // CONFIGURAÇÃO ORIGINAL - NÃO MUDAR!
         const conf = [
-            {baseMin: 2, baseMax: 4, expMin: 2, expMax: 2, nome: "Nível 1 - Fácil"},     // 2² a 4²
-            {baseMin: 2, baseMax: 5, expMin: 2, expMax: 2, nome: "Nível 2"},              // 2² a 5²
-            {baseMin: 2, baseMax: 5, expMin: 2, expMax: 3, nome: "Nível 3"},              // 2² a 5³
-            {baseMin: 2, baseMax: 8, expMin: 2, expMax: 3, nome: "Nível 4"},              // 2² a 8³
-            {baseMin: 2, baseMax: 10, expMin: 2, expMax: 4, nome: "Nível 5 - Difícil"}    // 2² a 10⁴
+            {t:12, d:20, bm:5, em:2},   // Nível 1: base de 2 a 5, expoente 2
+            {t:10, d:25, bm:10, em:2},  // Nível 2: base de 2 a 10, expoente 2
+            {t:10, d:25, bm:5, em:3},   // Nível 3: base de 2 a 5, expoente 2-3
+            {t:8, d:34, bm:12, em:2},   // Nível 4: base de 2 a 12, expoente 2
+            {t:8, d:34, bm:10, em:3}    // Nível 5: base de 2 a 10, expoente 2-3
         ];
 
         // ========== SISTEMA DE NARRAÇÃO ==========
@@ -330,21 +323,11 @@
             fecharAdmin();
         }
         
-        // ========== FUNÇÕES DO JOGO CORRIGIDAS ==========
+        // ========== FUNÇÕES DO JOGO - EXATAMENTE IGUAIS AO ORIGINAL ==========
         function validarProgresso() {
             const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return;
             const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            for(let i=1; i<=4; i++) { 
-                const el = document.getElementById('l'+i);
-                if(el) el.innerText = p >= i ? "🔓" : "🔒";
-            }
-            // Seleciona o maior nível disponível
-            if(p >= 0 && document.getElementById('btn-'+p)) {
-                curLvl = p;
-                document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
-                document.getElementById('btn-'+p).style.background = "#eee";
-            }
+            for(let i=1; i<=4; i++) { if(document.getElementById('l'+i)) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒"; }
         }
 
         function selecionarNivel(l) {
@@ -357,7 +340,7 @@
                 document.getElementById('btn-'+l).style.background = "#eee";
                 falar(`Nível ${l+1} selecionado`);
             } else { 
-                alert("Nível Bloqueado! Complete os níveis anteriores primeiro.");
+                alert("Nível Bloqueado!");
             }
         }
         
@@ -376,132 +359,59 @@
             } 
         }
         
-        // FUNÇÃO RODAR CORRIGIDA - Agora gera desafios diferentes!
+        // FUNÇÃO RODAR - IDÊNTICA AO ORIGINAL
         function rodar() {
             if(!ativo) return;
-            
-            // Pega as configurações do nível atual
-            const nivel = conf[curLvl];
-            
-            // Gera base e expoente dentro dos limites do nível
-            let base = Math.floor(Math.random() * (nivel.baseMax - nivel.baseMin + 1)) + nivel.baseMin;
-            let expoente = Math.floor(Math.random() * (nivel.expMax - nivel.expMin + 1)) + nivel.expMin;
-            
-            // Calcula a potência
-            let resultado = Math.pow(base, expoente);
-            
-            // Evita números extremamente grandes (acima de 10 milhões)
-            while(resultado > 10000000) {
-                base = Math.floor(Math.random() * (nivel.baseMax - nivel.baseMin + 1)) + nivel.baseMin;
-                expoente = Math.floor(Math.random() * (nivel.expMax - nivel.expMin + 1)) + nivel.expMin;
-                resultado = Math.pow(base, expoente);
-            }
-            
-            res = resultado;
-            document.getElementById('q-box').innerHTML = `${base}<sup>${expoente}</sup>`;
+            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
+            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
+            res = Math.pow(b, e);
+            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
             document.getElementById('ans').value = ""; 
             document.getElementById('ans').focus();
-            
-            // Narra a potência
-            falar(`Calcule ${base} elevado a ${expoente}`);
-            
-            console.log(`Nível ${curLvl+1}: ${base}^${expoente} = ${res}`); // Para debug
+            falar(`Calcule ${b} elevado a ${e}`);
         }
         
         function tentarIniciar() {
-            const nome = document.getElementById('nome-aluno').value.trim();
-            if(nome.length < 2) {
-                alert("Digite um nome com pelo menos 2 caracteres!");
+            if(document.getElementById('nome-aluno').value.length < 3) {
+                alert("Digite um nome com pelo menos 3 caracteres!");
                 return;
             }
-            
-            nomeJogador = nome;
+            nomeJogador = document.getElementById('nome-aluno').value.trim();
+            document.getElementById('setup-screen').style.display='none';
+            document.getElementById('game-screen').style.display='block';
             vida = 100;
             acertos = 0;
             ativo = true;
-            
-            document.getElementById('setup-screen').style.display='none';
-            document.getElementById('game-screen').style.display='block';
             document.getElementById('nivel-atual').innerHTML = curLvl+1;
             document.getElementById('acertos-count').innerHTML = "0";
             document.getElementById('vida-valor').innerHTML = "100";
             document.getElementById('life-bar').style.width = "100%";
-            document.getElementById('timer').innerHTML = "0s";
-            
             iniciarTimer();
-            falar(`Batalha iniciada! ${conf[curLvl].nome}`);
+            falar(`Batalha iniciada! Nível ${curLvl+1}`);
             rodar();
         }
         
-        // FUNÇÃO CHECK CORRIGIDA
+        // FUNÇÃO CHECK - IDÊNTICA AO ORIGINAL (só adiciona voz e ranking)
         function check() {
-            if(!ativo) return;
-            
             let v = parseInt(document.getElementById('ans').value);
-            if(isNaN(v)) {
-                falar("Digite um número válido!");
-                return;
-            }
-            
             if(v === res) {
                 acertos++;
                 document.getElementById('acertos-count').innerHTML = acertos;
                 falar(`Acertou! ${res} está correto!`);
                 mostrarVisual('acerto');
                 canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                
-                // Verifica se completou 5 acertos para avançar de nível
-                if(acertos >= 5) {
-                    if(curLvl < 4) {
-                        // Avança para o próximo nível
-                        curLvl++;
-                        acertos = 0;
-                        vida = 100;
-                        document.getElementById('nivel-atual').innerHTML = curLvl+1;
-                        document.getElementById('acertos-count').innerHTML = "0";
-                        document.getElementById('life-bar').style.width = "100%";
-                        document.getElementById('vida-valor').innerHTML = "100";
-                        
-                        // Salva o progresso
-                        const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                        if(curLvl > progressoAtual) {
-                            localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
-                        }
-                        
-                        falar(`Parabéns! Você avançou para ${conf[curLvl].nome}!`);
-                        mostrarVisual('nivel');
-                        canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
-                        rodar();
-                    } else {
-                        // Zerou o jogo!
-                        pararTimer();
-                        const posicao = salvarRanking();
-                        falar(`PARABÉNS! Você completou todos os níveis! Ficou em ${posicao}º lugar no ranking!`);
-                        mostrarVisual('nivel');
-                        canvasConfetti({ particleCount: 500, spread: 150, origin: { y: 0.5 } });
-                        setTimeout(() => {
-                            alert(`🏆 CAMPEÃO! 🏆\nVocê zerou o jogo!\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º lugar`);
-                            location.reload();
-                        }, 2000);
-                        return;
-                    }
-                } else {
-                    rodar();
-                }
+                rodar();
             } else {
                 vida -= 20;
-                if(vida < 0) vida = 0;
-                
-                document.getElementById('life-bar').style.width = vida + "%";
-                document.getElementById('vida-valor').innerHTML = vida;
-                falar(`Errado! A resposta era ${res}. Perdeu 20 de vida. Restam ${vida}%`);
+                document.getElementById('life-bar').style.width = Math.max(0, vida) + "%";
+                document.getElementById('vida-valor').innerHTML = Math.max(0, vida);
+                falar(`Errado! A resposta era ${res}. Perdeu 20 de vida.`);
                 mostrarVisual('erro');
-                
                 if(vida <= 0) { 
                     pararTimer();
                     const posicao = salvarRanking();
                     falar(`Fim de jogo! Você ficou em ${posicao}º lugar no ranking!`);
-                    alert(`💀 GAME OVER! 💀\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º lugar`);
+                    alert(`Fim de jogo! Pontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`);
                     location.reload();
                 } else {
                     rodar();
@@ -510,21 +420,16 @@
         }
         
         function sairDoJogo() {
-            if(confirm("Tem certeza que quer sair? Seu progresso será salvo!")) {
+            if(confirm("Sair e salvar progresso?")) {
                 pararTimer();
                 salvarRanking();
-                
-                // Salva o progresso máximo alcançado
-                const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                if(curLvl > progressoAtual) {
-                    localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
-                }
-                
+                const progresso = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                if(curLvl > progresso) localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
                 ativo = false;
                 document.getElementById('setup-screen').style.display='block';
                 document.getElementById('game-screen').style.display='none';
                 validarProgresso();
-                falar("Progresso salvo! Até mais!");
+                falar("Progresso salvo!");
             }
         }
         
@@ -532,4 +437,15 @@
         window.onload = () => {
             renderBanners();
             carregarVozes();
-            if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregar
+            if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregarVozes;
+            document.getElementById('btn-0').style.background = "#eee";
+        };
+        
+        document.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') {
+                check();
+            }
+        });
+    </script>
+</body>
+</html>
