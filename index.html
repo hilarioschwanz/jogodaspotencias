@@ -9,12 +9,11 @@
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
             --danger: #e74c3c; --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
-            --bronze: #cd7f32; --silver: #c0c0c0; --platinum: #e5e4e2;
+            --bronze: #cd7f32; --silver: #c0c0c0;
         }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
-        /* BANNERS */
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
         .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; transition: opacity 0.8s; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 5; }
@@ -22,7 +21,6 @@
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; text-transform: uppercase; }
         .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; }
 
-        /* CARD JOGO */
         .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); width: 100%; max-width: 500px; }
         .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; transition: transform 0.2s; }
         .btn-main:hover { transform: scale(0.98); }
@@ -33,14 +31,12 @@
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; }
         #ans:focus { outline: none; border-color: var(--accent); }
         
-        /* INFOS DO JOGO */
         .game-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 15px; flex-wrap: wrap; }
         .info-item { text-align: center; flex: 1; min-width: 60px; }
         .info-label { font-size: 12px; color: #666; }
         .info-value { font-size: 20px; font-weight: bold; color: var(--primary); }
         .timer { font-size: 24px; font-weight: bold; color: var(--accent); font-family: monospace; }
 
-        /* CONTROLES DE ACESSIBILIDADE */
         .accessibility-bar { background: #2c3e50; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         .voice-control { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
         .voice-select { padding: 10px; border-radius: 10px; border: 2px solid var(--gold); background: white; font-size: 14px; flex: 1; min-width: 150px; }
@@ -49,8 +45,6 @@
         .high-contrast { background: #000 !important; color: #fff !important; }
         .high-contrast .card { background: #222; color: #fff; border: 2px solid #fff; }
         
-        /* RANKING */
-        .ranking-section { margin-top: 30px; }
         .ranking-btn { background: var(--gold); color: #333; border: none; padding: 12px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; margin-top: 10px; }
         .ranking-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 25px; padding: 25px; width: 95%; max-width: 500px; max-height: 80vh; overflow-y: auto; z-index: 10000; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
         .ranking-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
@@ -59,17 +53,11 @@
         .ranking-score { color: var(--accent); font-weight: bold; }
         .ranking-details { font-size: 12px; color: #666; }
 
-        /* PAINEL ADMIN */
-        .admin-panel { 
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; 
-            width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 2px solid #ccc;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
+        .admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 2px solid #ccc; max-height: 90vh; overflow-y: auto; }
         .slots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
         .slot-card { background: #f5f5f5; padding: 10px; border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent; }
         .slot-card.selected { border-color: var(--accent); background: #ffe0e5; }
+        .admin-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; }
         
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; transition: color 0.2s; }
         footer:hover { color: var(--gold); }
@@ -78,10 +66,7 @@
         .feedback-success { background: var(--success); }
         .feedback-error { background: var(--danger); }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 9999; }
         .visual-indicator.show { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
@@ -90,7 +75,6 @@
 <body>
 
     <div class="visual-indicator" id="visualIndicator">✅</div>
-
     <div class="banner-wrapper" id="banner-area"></div>
 
     <div id="setup-screen" class="card">
@@ -98,7 +82,6 @@
         <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
         <p style="color:#666; margin-bottom:20px">Calcule as potências e derrote os inimigos!</p>
         
-        <!-- BARRA DE ACESSIBILIDADE -->
         <div class="accessibility-bar">
             <div class="voice-control">
                 <select id="voice-select" class="voice-select" onchange="selecionarVoz()">
@@ -127,22 +110,10 @@
         </div>
         
         <div class="game-info">
-            <div class="info-item">
-                <div class="info-label">🎯 Nível</div>
-                <div class="info-value" id="nivel-atual">1</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">✅ Acertos</div>
-                <div class="info-value" id="acertos-count">0</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">❌ Erros</div>
-                <div class="info-value" id="erros-count">0</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">⏱️ Tempo</div>
-                <div class="info-value timer" id="timer">0s</div>
-            </div>
+            <div class="info-item"><div class="info-label">🎯 Nível</div><div class="info-value" id="nivel-atual">1</div></div>
+            <div class="info-item"><div class="info-label">✅ Acertos</div><div class="info-value" id="acertos-count">0</div></div>
+            <div class="info-item"><div class="info-label">❤️ Vida</div><div class="info-value" id="vida-valor">100</div></div>
+            <div class="info-item"><div class="info-label">⏱️ Tempo</div><div class="info-value timer" id="timer">0s</div></div>
         </div>
         
         <div id="q-box" class="power-display">?<sup>?</sup></div>
@@ -153,7 +124,6 @@
 
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Configurar Anúncios</footer>
 
-    <!-- PAINEL ADMIN -->
     <div id="admin-panel" class="admin-panel">
         <h3 style="margin-top:0; text-align:center">📢 Configurar Banners</h3>
         <div class="slots-grid" id="slots-grid">
@@ -171,7 +141,6 @@
         <button class="btn-main" style="background:#888" onclick="fecharAdmin()">❌ FECHAR</button>
     </div>
 
-    <!-- MODAL DE RANKING -->
     <div id="ranking-modal" class="ranking-modal">
         <h2 style="text-align:center">🏆 RANKING GLOBAL 🏆</h2>
         <div id="ranking-list"></div>
@@ -179,16 +148,19 @@
     </div>
 
     <script>
-        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, erros = 0, slideIdx = 0;
-        let nomeJogador = "", tempoInicio = 0, timerInterval = null, slotSelecionadoAdmin = 1;
+        // ========== CONFIGURAÇÕES DO JOGO (MANTIDAS DO ORIGINAL) ==========
+        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, slideIdx = 0;
+        let nomeJogador = "", tempoInicio = 0, timerInterval = null;
         let voiceEnabled = true, synthesis = window.speechSynthesis, selectedVoice = null;
+        let slotSelecionadoAdmin = 1;
         
+        // Configuração dos níveis IGUAL ao original
         const conf = [
-            {t:12, d:20, bm:5, em:2, nome:"Iniciante"},
-            {t:10, d:25, bm:10, em:2, nome:"Aprendiz"},
-            {t:10, d:25, bm:5, em:3, nome:"Guerreiro"},
-            {t:8, d:34, bm:12, em:2, nome:"Mestre"},
-            {t:8, d:34, bm:10, em:3, nome:"Lendário"}
+            {t:12, d:20, bm:5, em:2},  // Nível 1
+            {t:10, d:25, bm:10, em:2}, // Nível 2
+            {t:10, d:25, bm:5, em:3},  // Nível 3
+            {t:8, d:34, bm:12, em:2},  // Nível 4
+            {t:8, d:34, bm:10, em:3}   // Nível 5
         ];
 
         // ========== SISTEMA DE NARRAÇÃO ==========
@@ -198,7 +170,6 @@
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'pt-BR';
             utterance.rate = 0.9;
-            utterance.pitch = 1;
             if(selectedVoice) utterance.voice = selectedVoice;
             synthesis.speak(utterance);
         }
@@ -206,9 +177,8 @@
         function carregarVozes() {
             const vozes = synthesis.getVoices();
             const select = document.getElementById('voice-select');
-            const vozesPT = vozes.filter(v => v.lang.includes('pt') || v.lang.includes('PT'));
+            const vozesPT = vozes.filter(v => v.lang.includes('pt'));
             const vozesDisp = vozesPT.length > 0 ? vozesPT : vozes;
-            
             select.innerHTML = '<option value="default">🎤 Voz Padrão</option>';
             vozesDisp.forEach((voz, i) => {
                 const option = document.createElement('option');
@@ -225,9 +195,7 @@
                 const vozesPT = vozes.filter(v => v.lang.includes('pt'));
                 const vozesDisp = vozesPT.length > 0 ? vozesPT : vozes;
                 selectedVoice = vozesDisp[parseInt(index)];
-            } else {
-                selectedVoice = null;
-            }
+            } else selectedVoice = null;
         }
         
         function toggleVoice() {
@@ -235,29 +203,16 @@
             const btn = document.getElementById('voice-toggle');
             btn.textContent = voiceEnabled ? "🔊 Narração: ATIVA" : "🔇 Narração: DESATIVADA";
             btn.classList.toggle('active', voiceEnabled);
-            if(voiceEnabled) falar("Narração ativada!");
-            else falar("Narração desativada");
+            if(voiceEnabled) falar("Narração ativada");
         }
         
-        function toggleHighContrast() {
-            document.body.classList.toggle('high-contrast');
-        }
+        function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
         
         function mostrarVisual(tipo) {
             const indicator = document.getElementById('visualIndicator');
-            if(tipo === 'acerto') {
-                indicator.innerHTML = '✅';
-                indicator.style.color = '#27ae60';
-            } else if(tipo === 'erro') {
-                indicator.innerHTML = '❌';
-                indicator.style.color = '#e74c3c';
-            } else if(tipo === 'nivel') {
-                indicator.innerHTML = '⭐';
-                indicator.style.color = '#f1c40f';
-            } else if(tipo === 'ranking') {
-                indicator.innerHTML = '🏆';
-                indicator.style.color = '#f1c40f';
-            }
+            if(tipo === 'acerto') { indicator.innerHTML = '✅'; indicator.style.color = '#27ae60'; }
+            else if(tipo === 'erro') { indicator.innerHTML = '❌'; indicator.style.color = '#e74c3c'; }
+            else if(tipo === 'nivel') { indicator.innerHTML = '⭐'; indicator.style.color = '#f1c40f'; }
             indicator.classList.add('show');
             setTimeout(() => indicator.classList.remove('show'), 500);
         }
@@ -265,53 +220,34 @@
         // ========== SISTEMA DE RANKING ==========
         function calcularPontuacao() {
             const tempoDecorrido = Math.floor((Date.now() - tempoInicio) / 1000);
-            const totalQuestoes = acertos + erros;
-            const percentualAcertos = totalQuestoes > 0 ? (acertos / totalQuestoes) * 100 : 0;
-            let pontuacao = (acertos * 100) - (erros * 50) - Math.floor(tempoDecorrido / 5);
+            let pontuacao = (acertos * 100) - Math.floor(tempoDecorrido / 5);
             pontuacao = Math.max(0, pontuacao);
-            return { pontuacao, percentualAcertos: percentualAcertos.toFixed(1), tempo: tempoDecorrido, acertos, erros, nivel: curLvl + 1 };
-        }
-        
-        function obterPosicaoRanking() {
-            const ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
-            const posicao = ranking.findIndex(r => r.nome === nomeJogador) + 1;
-            return posicao > 0 ? posicao : null;
+            return { pontuacao, tempo: tempoDecorrido, acertos, nivel: curLvl + 1 };
         }
         
         function salvarRanking() {
             const resultado = calcularPontuacao();
             let ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
             const idx = ranking.findIndex(r => r.nome === nomeJogador);
-            
-            if(idx !== -1) {
-                if(resultado.pontuacao > ranking[idx].pontuacao) {
-                    ranking[idx] = { ...ranking[idx], ...resultado, data: new Date().toISOString() };
-                }
-            } else {
-                ranking.push({ nome: nomeJogador, ...resultado, data: new Date().toISOString() });
-            }
-            
+            if(idx !== -1) { if(resultado.pontuacao > ranking[idx].pontuacao) ranking[idx] = { nome: nomeJogador, ...resultado, data: new Date().toISOString() }; } 
+            else { ranking.push({ nome: nomeJogador, ...resultado, data: new Date().toISOString() }); }
             ranking.sort((a, b) => b.pontuacao - a.pontuacao);
             if(ranking.length > 50) ranking = ranking.slice(0, 50);
             localStorage.setItem('pot_ranking', JSON.stringify(ranking));
-            
             const posicao = ranking.findIndex(r => r.nome === nomeJogador) + 1;
-            falar(`Parabéns ${nomeJogador}! Você alcançou ${resultado.pontuacao} pontos e ficou em ${posicao}º lugar no ranking!`);
-            mostrarVisual('ranking');
+            falar(`Você ficou em ${posicao}º lugar no ranking com ${resultado.pontuacao} pontos`);
             return posicao;
         }
         
         function mostrarRanking() {
             const ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
             const rankingList = document.getElementById('ranking-list');
-            
-            if(ranking.length === 0) {
-                rankingList.innerHTML = '<p style="text-align:center; color:#666;">Nenhum jogador no ranking ainda.</p>';
-            } else {
+            if(ranking.length === 0) rankingList.innerHTML = '<p style="text-align:center">Nenhum jogador no ranking</p>';
+            else {
                 let html = '';
                 ranking.forEach((jogador, idx) => {
                     let medalha = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : `#${idx+1} `;
-                    html += `<div class="ranking-item"><div class="ranking-position">${medalha}</div><div class="ranking-name">${jogador.nome}</div><div class="ranking-score">${jogador.pontuacao} pts</div><div class="ranking-details">${jogador.percentualAcertos}%<br>Nv${jogador.nivel}</div></div>`;
+                    html += `<div class="ranking-item"><div class="ranking-position">${medalha}</div><div class="ranking-name">${jogador.nome}</div><div class="ranking-score">${jogador.pontuacao} pts</div><div class="ranking-details">Nv${jogador.nivel}</div></div>`;
                 });
                 rankingList.innerHTML = html;
             }
@@ -327,39 +263,24 @@
             for(let i=1; i<=5; i++) {
                 const dados = localStorage.getItem('pot_ad_'+i);
                 if(dados) {
-                    try {
-                        const d = JSON.parse(dados);
-                        if(d && d.title) slides.push(d);
-                    } catch(e) {}
+                    try { const d = JSON.parse(dados); if(d && d.title) slides.push(d); } catch(e) {}
                 }
             }
-            if(slides.length === 0) { area.innerHTML = '<div class="slide active">📢 Anúncios Aqui</div>'; return; }
-            
+            if(slides.length === 0) { area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">📢 ANÚNCIOS AQUI</p></div>'; return; }
             let html = '';
-            slides.forEach(slide => {
-                html += `<div class="slide" onclick="window.open('${slide.link || '#'}')"><img src="${slide.url}" onerror="this.src='https://via.placeholder.com/80'"><div><p class="slide-title">${slide.title}</p><p class="slide-text">${slide.desc || ''}</p></div></div>`;
-            });
+            slides.forEach(slide => { html += `<div class="slide" onclick="window.open('${slide.link || '#'}')"><img src="${slide.url}" onerror="this.src='https://via.placeholder.com/80'"><div><p class="slide-title">${slide.title}</p><p class="slide-text">${slide.desc || ''}</p></div></div>`; });
             area.innerHTML = html;
             const slidesEl = area.querySelectorAll('.slide');
             if(slidesEl.length) {
                 slidesEl[0].classList.add('active');
-                if(slidesEl.length > 1) setInterval(() => {
-                    slidesEl[slideIdx].classList.remove('active');
-                    slideIdx = (slideIdx + 1) % slidesEl.length;
-                    slidesEl[slideIdx].classList.add('active');
-                }, 5000);
+                if(slidesEl.length > 1) setInterval(() => { slidesEl[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % slidesEl.length; slidesEl[slideIdx].classList.add('active'); }, 5000);
             }
         }
         
         function abrirAdmin() { if(prompt("Senha:") === "Food2024@") { document.getElementById('admin-panel').style.display='block'; atualizarPreviews(); selecionarSlotAdmin(1); } }
         function fecharAdmin() { document.getElementById('admin-panel').style.display='none'; }
         
-        function atualizarPreviews() {
-            for(let i=1; i<=5; i++) {
-                const d = JSON.parse(localStorage.getItem('pot_ad_'+i) || '{}');
-                document.getElementById(`preview-${i}`).innerHTML = d.title ? d.title.substring(0,10) : '📺 Vazio';
-            }
-        }
+        function atualizarPreviews() { for(let i=1; i<=5; i++) { const d = JSON.parse(localStorage.getItem('pot_ad_'+i) || '{}'); document.getElementById(`preview-${i}`).innerHTML = d.title ? d.title.substring(0,10) : '📺'; } }
         
         function selecionarSlotAdmin(slot) {
             slotSelecionadoAdmin = slot;
@@ -375,28 +296,28 @@
         function salvarGeral() {
             const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
             localStorage.setItem('pot_ad_'+slotSelecionadoAdmin, JSON.stringify(obj));
-            alert('Salvo!');
+            alert("Slot " + slotSelecionadoAdmin + " atualizado!");
             renderBanners();
             fecharAdmin();
         }
         
-        // ========== JOGO ==========
+        // ========== FUNÇÕES DO JOGO (MANTIDAS EXATAMENTE IGUAIS AO ORIGINAL) ==========
         function validarProgresso() {
-            const nome = document.getElementById('nome-aluno').value.trim();
-            if(!nome) return;
-            const p = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
-            for(let i=1; i<=4; i++) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒";
-            curLvl = p;
-            document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected'));
-            document.getElementById('btn-'+p)?.classList.add('lvl-selected');
+            const n = document.getElementById('nome-aluno').value.trim();
+            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
+            for(let i=1; i<=4; i++) { if(document.getElementById('l'+i)) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒"; }
         }
-        
+
         function selecionarNivel(l) {
-            const nome = document.getElementById('nome-aluno').value.trim();
-            if(!nome) return alert("Digite seu nome!");
-            const p = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
-            if(l <= p) { curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('lvl-selected')); document.getElementById('btn-'+l).classList.add('lvl-selected'); falar(`Nível ${l+1} selecionado`); }
-            else alert("Nível Bloqueado!");
+            const n = document.getElementById('nome-aluno').value.trim();
+            if(!n) return alert("Digite seu nome!");
+            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
+            if(l <= p) { 
+                curLvl = l; 
+                document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white"); 
+                document.getElementById('btn-'+l).style.background = "#eee";
+                falar(`Nível ${l+1} selecionado`);
+            } else { alert("Nível Bloqueado!"); }
         }
         
         function iniciarTimer() {
@@ -407,90 +328,75 @@
         
         function pararTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
         
-        function novaPergunta() {
+        // Função rodar IGUAL ao original
+        function rodar() {
             if(!ativo) return;
-            const nivel = conf[curLvl];
-            let base = Math.floor(Math.random() * (nivel.bm - 1)) + 2;
-            let exp = Math.floor(Math.random() * (nivel.em - 1)) + 2;
-            let resultado = Math.pow(base, exp);
-            if(resultado > 10000000) { base = 5; exp = 3; resultado = 125; }
-            res = resultado;
-            document.getElementById('q-box').innerHTML = `${base}<sup>${exp}</sup>`;
-            document.getElementById('ans').value = "";
+            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
+            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
+            res = Math.pow(b, e);
+            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
+            document.getElementById('ans').value = ""; 
             document.getElementById('ans').focus();
-            falar(`Calcule ${base} elevado a ${exp}`);
+            falar(`Calcule ${b} elevado a ${e}`);
         }
         
         function tentarIniciar() {
             const nome = document.getElementById('nome-aluno').value.trim();
-            if(nome.length < 2) return alert("Digite um nome válido!");
+            if(nome.length < 3) return alert("Digite um nome com pelo menos 3 caracteres!");
             nomeJogador = nome;
-            vida = 100; acertos = 0; erros = 0; ativo = true;
+            vida = 100;
+            acertos = 0;
+            ativo = true;
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('nivel-atual').innerHTML = curLvl+1;
             document.getElementById('acertos-count').innerHTML = "0";
-            document.getElementById('erros-count').innerHTML = "0";
             document.getElementById('vida-valor').innerHTML = "100";
             document.getElementById('life-bar').style.width = "100%";
             iniciarTimer();
-            falar(`Batalha iniciada! Nível ${curLvl+1}. Vamos calcular potências!`);
-            novaPergunta();
+            falar(`Batalha iniciada! Nível ${curLvl+1}`);
+            rodar();
         }
         
+        // Função check IGUAL ao original (só adiciona voz e ranking)
         function check() {
-            if(!ativo) return;
-            const resposta = parseInt(document.getElementById('ans').value);
-            if(isNaN(resposta)) { falar("Digite um número"); return; }
-            
-            if(resposta === res) {
+            let v = parseInt(document.getElementById('ans').value);
+            if(v === res) {
                 acertos++;
                 document.getElementById('acertos-count').innerHTML = acertos;
-                falar(`Parabéns! ${res} está correto! Acerto número ${acertos}`);
+                falar(`Acertou! ${res} está correto!`);
                 mostrarVisual('acerto');
-                canvasConfetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 
-                if(acertos >= 5) {
-                    if(curLvl < 4) {
-                        curLvl++;
-                        const progresso = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                        if(curLvl > progresso) localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
-                        vida = 100; acertos = 0;
-                        document.getElementById('nivel-atual').innerHTML = curLvl+1;
-                        document.getElementById('acertos-count').innerHTML = "0";
-                        document.getElementById('life-bar').style.width = "100%";
-                        document.getElementById('vida-valor').innerHTML = "100";
-                        falar(`Incrível! Você avançou para o Nível ${curLvl+1}! Parabéns!`);
-                        mostrarVisual('nivel');
-                        canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
-                    } else {
-                        pararTimer();
-                        const posicao = salvarRanking();
-                        falar(`PARABÉNS! Você zerou o jogo! Ficou em ${posicao}º lugar no ranking!`);
-                        mostrarVisual('ranking');
-                        canvasConfetti({ particleCount: 500, spread: 150, origin: { y: 0.5 } });
-                        setTimeout(() => { alert(`Campeão! Pontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`); sairDoJogo(); }, 2000);
-                        return;
-                    }
+                // Verifica se completou 5 acertos para avançar (como no original)
+                if(acertos >= 5 && curLvl < 4) {
+                    curLvl++;
+                    vida = 100;
+                    acertos = 0;
+                    document.getElementById('nivel-atual').innerHTML = curLvl+1;
+                    document.getElementById('acertos-count').innerHTML = "0";
+                    document.getElementById('life-bar').style.width = "100%";
+                    document.getElementById('vida-valor').innerHTML = "100";
+                    falar(`Parabéns! Você avançou para o Nível ${curLvl+1}!`);
+                    mostrarVisual('nivel');
+                    canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 }
-                novaPergunta();
+                rodar();
             } else {
-                erros++;
                 vida -= 20;
-                if(vida < 0) vida = 0;
-                document.getElementById('erros-count').innerHTML = erros;
-                document.getElementById('life-bar').style.width = vida + "%";
-                document.getElementById('vida-valor').innerHTML = vida;
-                falar(`Errado! A resposta correta era ${res}. Você perdeu 20 de vida. Restam ${vida}%`);
+                document.getElementById('life-bar').style.width = Math.max(0, vida) + "%";
+                document.getElementById('vida-valor').innerHTML = Math.max(0, vida);
+                falar(`Errado! A resposta era ${res}. Perdeu 20 de vida.`);
                 mostrarVisual('erro');
                 
-                if(vida <= 0) {
+                if(vida <= 0) { 
                     pararTimer();
                     const posicao = salvarRanking();
-                    falar(`Game Over! Sua pontuação final foi ${calcularPontuacao().pontuacao} pontos. Posição: ${posicao}º lugar`);
-                    setTimeout(() => { alert(`Fim de jogo!\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`); sairDoJogo(); }, 2000);
+                    falar(`Fim de jogo! Você ficou em ${posicao}º lugar no ranking!`);
+                    alert(`Fim de jogo! Pontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`);
+                    location.reload();
                 } else {
-                    novaPergunta();
+                    rodar();
                 }
             }
         }
@@ -505,7 +411,7 @@
                 document.getElementById('setup-screen').style.display='block';
                 document.getElementById('game-screen').style.display='none';
                 validarProgresso();
-                falar("Progresso salvo! Até mais!");
+                falar("Progresso salvo!");
             }
         }
         
@@ -514,7 +420,7 @@
             renderBanners();
             carregarVozes();
             if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregarVozes;
-            document.getElementById('btn-0')?.classList.add('lvl-selected');
+            document.getElementById('btn-0').style.background = "#eee";
         };
         
         document.addEventListener('keypress', e => { if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') check(); });
