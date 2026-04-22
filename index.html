@@ -13,7 +13,7 @@
         * { box-sizing: border-box; transition: background 0.3s; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
-        /* --- BANNERS EXTERNOS --- */
+        /* BANNERS EXTERNOS */
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
         .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; transition: opacity 0.8s; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 5; }
@@ -21,7 +21,7 @@
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; text-transform: uppercase; }
         .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; line-height: 1.3; }
 
-        /* --- JANELA DO JOGO (CARD) --- */
+        /* JANELA DO JOGO */
         .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; width: 100%; max-width: 500px; z-index: 10; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
         .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
@@ -34,7 +34,7 @@
         .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; font-size: 1rem; }
         .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
         
-        /* --- MURAL EXTERNO --- */
+        /* MURAL EXTERNO */
         .extra-content { width: 100%; max-width: 800px; margin-top: 50px; text-align: center; }
         .section-title { color: var(--gold); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .mural-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
@@ -42,7 +42,7 @@
         .testi-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; display: block; }
         .testi-text { font-size: 0.9rem; color: #eee; font-style: italic; }
 
-        /* --- OVERLAYS --- */
+        /* OVERLAYS */
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; color: #333; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: 600; }
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 25px; z-index: 2000; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
@@ -107,8 +107,8 @@
                 <p class="testi-text">Domine as potências para desbloquear novos níveis e subir no ranking!</p>
             </div>
             <div class="testi-card">
-                <span class="testi-name">ZELAYCE</span>
-                <p class="testi-text">O sabor que refresca sua inteligência.</p>
+                <span class="testi-name">BEER FOOD TRUCK</span>
+                <p class="testi-text">O melhor lanche da região para recarregar as energias após o desafio!</p>
             </div>
         </div>
     </div>
@@ -132,6 +132,8 @@
 
     <script>
         let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
+        
+        // Configuração de Níveis: [Tempo, Dano, Base Máx, Expoente Máx]
         const conf = [
             {t: 12, d: 20, bm: 5, em: 2}, 
             {t: 10, d: 25, bm: 10, em: 2}, 
@@ -144,7 +146,7 @@
             const area = document.getElementById('banner-area');
             let h = '';
             for(let i=1; i<=3; i++) {
-                const d = JSON.parse(localStorage.getItem('p_ad_'+i)) || { title: "Vazio", desc: "Anuncie Aqui", url: "", link: "#" };
+                const d = JSON.parse(localStorage.getItem('pot_ad_'+i)) || { title: "Vazio", desc: "Espaço Publicitário", url: "", link: "#" };
                 h += `<div class="slide ${i===1?'active':''}" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
             }
             area.innerHTML = h;
@@ -160,7 +162,7 @@
         function abrirAdmin() { if(prompt("Senha:") === "Food2024@") document.getElementById('admin-panel').style.display='block'; }
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
-            const d = JSON.parse(localStorage.getItem('p_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
+            const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
             document.getElementById('ad-title').value = d.title;
             document.getElementById('ad-desc').value = d.desc;
             document.getElementById('ad-img').value = d.url;
@@ -169,12 +171,12 @@
         function salvarGeral() {
             const slot = document.getElementById('ad-slot').value;
             const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
-            localStorage.setItem('p_ad_'+slot, JSON.stringify(obj)); location.reload();
+            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj)); location.reload();
         }
 
         function validarProgresso() {
             const n = document.getElementById('nome-aluno').value.trim();
-            const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
+            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
             for(let i=1; i<=4; i++) {
                 const el = document.getElementById('l'+i);
                 if(el) el.innerText = p >= i ? "🔓" : "🔒";
@@ -183,8 +185,8 @@
 
         function selecionarNivel(l) {
             const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return alert("Digite seu nome!");
-            const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
+            if(!n) return alert("Digite o seu nome!");
+            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
             if(l > p) return alert("Nível Bloqueado!");
             curLvl = l;
             document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
@@ -192,7 +194,7 @@
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return;
+            if(document.getElementById('nome-aluno').value.length < 3) return alert("Nome muito curto!");
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -229,19 +231,19 @@
             ativo = false; clearInterval(crono);
             const n = document.getElementById('nome-aluno').value.trim();
             const ef = Math.round((acertos/tentativas)*100) || 0;
-            let r = JSON.parse(localStorage.getItem('p_rank')) || [];
+            let r = JSON.parse(localStorage.getItem('pot_rank')) || [];
             r.push({nome: n, avatar: avatarSel, efic: ef, lvl: (curLvl+1)});
             r.sort((a,b) => b.efic - a.efic);
-            localStorage.setItem('p_rank', JSON.stringify(r.slice(0,10)));
+            localStorage.setItem('pot_rank', JSON.stringify(r.slice(0,10)));
             if(vida > 0) {
-                const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
-                if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
+                const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
+                if(curLvl >= p) localStorage.setItem('pot_prog_'+n, curLvl + 1);
             }
-            alert(`Fim! Precisão: ${ef}%`); location.reload();
+            alert(`Fim de Jogo! Precisão: ${ef}%`); location.reload();
         }
 
         function verRanking() {
-            const r = JSON.parse(localStorage.getItem('p_rank')) || [];
+            const r = JSON.parse(localStorage.getItem('pot_rank')) || [];
             document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes";
             document.getElementById('ranking-box').style.display='block';
         }
