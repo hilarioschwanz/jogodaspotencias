@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha das Potências</title>
+    <title>Batalha das Potências - Professor Hilário</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
-            --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
+            --danger: #e74c3c; --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
         }
-        * { box-sizing: border-box; transition: background 0.3s; }
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
         /* BANNERS */
@@ -23,28 +23,44 @@
 
         /* CARD JOGO */
         .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); width: 100%; max-width: 500px; }
-        .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; }
-        .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; }
+        .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; transition: transform 0.2s; }
+        .btn-main:hover { transform: scale(0.98); }
+        .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; transition: all 0.2s; }
+        .lvl-btn:hover { border-color: var(--accent); }
+        .lvl-selected { background: #e94560 !important; color: white !important; border-color: var(--accent); }
         .power-display { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; }
+        #ans:focus { outline: none; border-color: var(--accent); }
+        
+        /* INFOS DO JOGO */
+        .game-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 15px; }
+        .info-item { text-align: center; }
+        .info-label { font-size: 12px; color: #666; }
+        .info-value { font-size: 20px; font-weight: bold; color: var(--primary); }
 
         /* PAINEL ADMIN */
         #admin-panel { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; 
             width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 2px solid #ccc;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .admin-label { display: block; font-size: 14px; color: #444; margin-bottom: 8px; font-weight: bold; text-align: left; }
+        .admin-select, .admin-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; }
+        .admin-select:focus, .admin-input:focus { outline: none; border-color: var(--accent); }
         
-        .admin-select {
-            width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid var(--accent); 
-            border-radius: 12px; font-size: 16px; background: #fff; color: #333;
-            appearance: auto; cursor: pointer; font-weight: bold;
+        footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; transition: color 0.2s; }
+        footer:hover { color: var(--gold); }
+        
+        .feedback { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; color: white; font-weight: bold; z-index: 10000; animation: slideIn 0.3s ease; }
+        .feedback-success { background: var(--success); }
+        .feedback-error { background: var(--danger); }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-
-        .admin-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 15px; }
-        
-        footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,32 +68,51 @@
     <div class="banner-wrapper" id="banner-area"></div>
 
     <div id="setup-screen" class="card">
-        <strong style="color:var(--accent)">👨‍🏫 Professor Hilário</strong>
+        <strong style="color:var(--accent)">👨‍🏫 Professor Hilário Schwanz</strong>
         <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
+        <p style="color:#666; margin-bottom:20px">Calcule as potências e derrote os inimigos!</p>
         <input type="text" id="nome-aluno" placeholder="Digite seu nome" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;" oninput="validarProgresso()">
         <div id="lvls" style="margin-top:20px">
-            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>Nível 1</span> <span>🔓</span></div>
-            <div class="lvl-btn" id="btn-1" onclick="selecionarNivel(1)"><span>Nível 2</span> <span id="l1">🔒</span></div>
-            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>Nível 3</span> <span id="l2">🔒</span></div>
-            <div class="lvl-btn" id="btn-3" onclick="selecionarNivel(3)"><span>Nível 4</span> <span id="l3">🔒</span></div>
-            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>Nível 5</span> <span id="l4">🔒</span></div>
+            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>🌟 Nível 1</span> <span>🔓</span></div>
+            <div class="lvl-btn" id="btn-1" onclick="selecionarNivel(1)"><span>⚡ Nível 2</span> <span id="l1">🔒</span></div>
+            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>🔥 Nível 3</span> <span id="l2">🔒</span></div>
+            <div class="lvl-btn" id="btn-3" onclick="selecionarNivel(3)"><span>💪 Nível 4</span> <span id="l3">🔒</span></div>
+            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>🏆 Nível 5</span> <span id="l4">🔒</span></div>
         </div>
-        <button class="btn-main" onclick="tentarIniciar()">INICIAR JOGO</button>
+        <button class="btn-main" onclick="tentarIniciar()">⚔️ INICIAR JOGO ⚔️</button>
     </div>
 
     <div id="game-screen" class="card" style="display:none;">
         <div id="life-container" style="width:100%; background:#eee; height:10px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
-            <div id="life-bar" style="width:100%; height:100%; background:var(--success);"></div>
+            <div id="life-bar" style="width:100%; height:100%; background:var(--success); transition: width 0.3s;"></div>
         </div>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">🎯 Nível</div>
+                <div class="info-value" id="nivel-atual">1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">✅ Acertos</div>
+                <div class="info-value" id="acertos-count">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">❤️ Vida</div>
+                <div class="info-value" id="vida-valor">100</div>
+            </div>
+        </div>
+        
         <div id="q-box" class="power-display">?<sup>?</sup></div>
-        <input type="number" id="ans" inputmode="numeric">
-        <button class="btn-main" onclick="check()">ATACAR</button>
+        <input type="number" id="ans" inputmode="numeric" placeholder="Digite o resultado">
+        <button class="btn-main" onclick="check()">⚡ ATACAR ⚡</button>
+        <button class="btn-main" style="background:#666; margin-top:10px" onclick="sairDoJogo()">🚪 SAIR DO JOGO</button>
     </div>
 
-    <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
+    <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Clique para Configurar Anúncios</footer>
 
     <div id="admin-panel">
-        <h3 style="margin-top:0; text-align:center">Configurar Banners</h3>
+        <h3 style="margin-top:0; text-align:center">📢 Configurar Banners</h3>
+        <p style="font-size:12px; color:#666; text-align:center">Senha: Food2024@</p>
         
         <label class="admin-label">Selecione o Slot para Editar:</label>
         <select id="ad-slot" class="admin-select" onchange="carregarCamposAdmin()">
@@ -88,130 +123,337 @@
             <option value="5">Slot 5</option>
         </select>
 
-        <label class="admin-label">Título / Nome do Negócio:</label>
+        <label class="admin-label">🏷️ Título / Nome do Negócio:</label>
         <input type="text" id="ad-title" placeholder="Ex: BEER FOOD TRUCK" class="admin-input">
         
-        <label class="admin-label">Descrição / Chamada:</label>
+        <label class="admin-label">📝 Descrição / Chamada:</label>
         <input type="text" id="ad-desc" placeholder="Frase do anúncio..." class="admin-input">
         
-        <label class="admin-label">URL da Imagem:</label>
+        <label class="admin-label">🖼️ URL da Imagem:</label>
         <input type="text" id="ad-img" placeholder="https://link-da-imagem.jpg" class="admin-input">
         
-        <label class="admin-label">Link de Destino:</label>
+        <label class="admin-label">🔗 Link de Destino:</label>
         <input type="text" id="ad-link" placeholder="https://instagram.com/..." class="admin-input">
         
-        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR ALTERAÇÕES</button>
-        <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
+        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">💾 SALVAR ALTERAÇÕES</button>
+        <button class="btn-main" style="background:#888" onclick="fecharAdmin()">❌ FECHAR</button>
     </div>
 
     <script>
-        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, tentativas = 0, slideIdx = 0;
-        const conf = [{t:12,d:20,bm:5,em:2},{t:10,d:25,bm:10,em:2},{t:10,d:25,bm:5,em:3},{t:8,d:34,bm:12,em:2},{t:8,d:34,bm:10,em:3}];
+        let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, slideIdx = 0;
+        let nomeJogador = "";
+        
+        const conf = [
+            {t:12, d:20, bm:5, em:2, nome:"Iniciante"},    // base min 2, expoente min 2
+            {t:10, d:25, bm:10, em:2, nome:"Aprendiz"},    // base min 2-10, expoente 2
+            {t:10, d:25, bm:5, em:3, nome:"Guerreiro"},    // expoente 2-3
+            {t:8, d:34, bm:12, em:2, nome:"Mestre"},       // base 2-12
+            {t:8, d:34, bm:10, em:3, nome:"Lendário"}      // base 2-10, expoente 2-3
+        ];
+
+        function mostrarFeedback(mensagem, tipo) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback feedback-${tipo}`;
+            feedback.textContent = mensagem;
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
+        }
 
         function renderBanners() {
             const area = document.getElementById('banner-area');
-            let h = ''; let c = 0;
+            let slides = [];
+            
             for(let i=1; i<=5; i++) {
-                const d = JSON.parse(localStorage.getItem('pot_ad_'+i));
-                if(d && d.title) {
-                    h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
-                    c++;
+                const dados = localStorage.getItem('pot_ad_'+i);
+                if(dados) {
+                    try {
+                        const d = JSON.parse(dados);
+                        if(d && d.title && d.title.trim() !== "") {
+                            slides.push(d);
+                        }
+                    } catch(e) {}
                 }
             }
-            if(c === 0) { area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANÚNCIOS AQUI</p></div>'; }
-            else {
-                area.innerHTML = h;
-                const slides = area.querySelectorAll('.slide');
-                slides[0].classList.add('active');
-                if(c > 1) {
+            
+            if(slides.length === 0) { 
+                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">📢 ANÚNCIOS AQUI</p><p style="font-size:12px">Clique no rodapé para configurar</p></div>'; 
+                return;
+            }
+            
+            let html = '';
+            slides.forEach((slide, idx) => {
+                html += `<div class="slide" onclick="window.open('${slide.link || '#'}', '_blank')">
+                            <img src="${slide.url || 'https://via.placeholder.com/80'}" onerror="this.src='https://via.placeholder.com/80'">
+                            <div class="slide-info">
+                                <p class="slide-title">${escapeHtml(slide.title)}</p>
+                                <p class="slide-text">${escapeHtml(slide.desc || '')}</p>
+                            </div>
+                         </div>`;
+            });
+            area.innerHTML = html;
+            
+            const slidesElements = area.querySelectorAll('.slide');
+            if(slidesElements.length > 0) {
+                slidesElements[0].classList.add('active');
+                if(slidesElements.length > 1) {
                     setInterval(() => {
-                        slides[slideIdx].classList.remove('active');
-                        slideIdx = (slideIdx + 1) % slides.length;
-                        slides[slideIdx].classList.add('active');
+                        slidesElements[slideIdx].classList.remove('active');
+                        slideIdx = (slideIdx + 1) % slidesElements.length;
+                        slidesElements[slideIdx].classList.add('active');
                     }, 5000);
                 }
             }
         }
+        
+        function escapeHtml(text) {
+            if(!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         function abrirAdmin() { 
-            if(prompt("Senha:") === "Food2024@") {
+            const senha = prompt("Digite a senha do administrador:");
+            if(senha === "Food2024@") {
                 document.getElementById('admin-panel').style.display='block';
                 carregarCamposAdmin();
+            } else if(senha !== null) {
+                mostrarFeedback("Senha incorreta!", "error");
             }
+        }
+        
+        function fecharAdmin() {
+            document.getElementById('admin-panel').style.display='none';
         }
 
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
-            const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
-            document.getElementById('ad-title').value = d.title;
-            document.getElementById('ad-desc').value = d.desc;
-            document.getElementById('ad-img').value = d.url;
-            document.getElementById('ad-link').value = d.link;
+            const dados = localStorage.getItem('pot_ad_'+slot);
+            let d = { title: "", desc: "", url: "", link: "" };
+            if(dados) {
+                try {
+                    d = JSON.parse(dados);
+                } catch(e) {}
+            }
+            document.getElementById('ad-title').value = d.title || "";
+            document.getElementById('ad-desc').value = d.desc || "";
+            document.getElementById('ad-img').value = d.url || "";
+            document.getElementById('ad-link').value = d.link || "";
         }
 
         function salvarGeral() {
             const slot = document.getElementById('ad-slot').value;
-            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
+            const obj = { 
+                title: document.getElementById('ad-title').value, 
+                desc: document.getElementById('ad-desc').value, 
+                url: document.getElementById('ad-img').value, 
+                link: document.getElementById('ad-link').value 
+            };
             localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj));
-            alert("Slot " + slot + " atualizado!");
-            location.reload();
+            mostrarFeedback(`Slot ${slot} salvo com sucesso!`, "success");
+            setTimeout(() => {
+                renderBanners();
+                fecharAdmin();
+            }, 1000);
         }
 
         function validarProgresso() {
-            const n = document.getElementById('nome-aluno').value.trim();
-            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            for(let i=1; i<=4; i++) { if(document.getElementById('l'+i)) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒"; }
+            const nome = document.getElementById('nome-aluno').value.trim();
+            if(!nome) return;
+            
+            const progresso = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
+            for(let i=1; i<=4; i++) { 
+                const elemento = document.getElementById('l'+i);
+                if(elemento) elemento.innerText = progresso >= i ? "🔓" : "🔒";
+            }
+            
+            // Seleciona o maior nível disponível automaticamente
+            if(progresso >= 0) {
+                curLvl = progresso;
+                document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected'));
+                document.getElementById('btn-'+progresso).classList.add('lvl-selected');
+            }
         }
 
         function selecionarNivel(l) {
-            const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return alert("Digite seu nome!");
-            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            if(l <= p) { 
+            const nome = document.getElementById('nome-aluno').value.trim();
+            if(!nome) {
+                mostrarFeedback("Digite seu nome primeiro!", "error");
+                return;
+            }
+            
+            const progresso = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
+            if(l <= progresso) { 
                 curLvl = l; 
-                document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white"); 
-                document.getElementById('btn-'+l).style.background = "#eee"; 
+                document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected')); 
+                document.getElementById('btn-'+l).classList.add('lvl-selected');
+                mostrarFeedback(`Nível ${l+1} selecionado!`, "success");
             } else {
-                alert("Nível Bloqueado!");
+                mostrarFeedback(`Nível ${l+1} está bloqueado! Complete os níveis anteriores.`, "error");
             }
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return;
+            const nome = document.getElementById('nome-aluno').value.trim();
+            if(nome.length < 2) {
+                mostrarFeedback("Digite um nome válido!", "error");
+                return;
+            }
+            
+            nomeJogador = nome;
+            vida = 100;
+            acertos = 0;
+            ativo = true;
+            
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
-            vida = 100;
-            ativo = true; 
-            rodar();
+            document.getElementById('nivel-atual').innerHTML = curLvl + 1;
+            document.getElementById('acertos-count').innerHTML = "0";
+            document.getElementById('vida-valor').innerHTML = "100";
+            document.getElementById('life-bar').style.width = "100%";
+            
+            novaPergunta();
+        }
+        
+        function sairDoJogo() {
+            if(confirm("Tem certeza que quer sair? Seu progresso será salvo!")) {
+                // Salva o progresso
+                const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                const novoProgresso = Math.max(progressoAtual, curLvl);
+                localStorage.setItem('pot_prog_'+nomeJogador, novoProgresso);
+                
+                ativo = false;
+                document.getElementById('setup-screen').style.display='block';
+                document.getElementById('game-screen').style.display='none';
+                validarProgresso();
+                mostrarFeedback("Progresso salvo! Volte quando quiser!", "success");
+            }
         }
 
-        function rodar() {
+        function novaPergunta() {
             if(!ativo) return;
-            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
-            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
-            res = Math.pow(b, e);
-            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
+            
+            const nivel = conf[curLvl];
+            const baseMin = 2;
+            const baseMax = nivel.bm;
+            const expMin = 2;
+            const expMax = nivel.em;
+            
+            let base = Math.floor(Math.random() * (baseMax - baseMin + 1)) + baseMin;
+            let expoente = Math.floor(Math.random() * (expMax - expMin + 1)) + expMin;
+            
+            // Evita números muito grandes (máximo 10^10)
+            let resultado = Math.pow(base, expoente);
+            if(resultado > 1000000000) {
+                base = Math.min(base, 8);
+                expoente = Math.min(expoente, 4);
+                resultado = Math.pow(base, expoente);
+            }
+            
+            res = resultado;
+            document.getElementById('q-box').innerHTML = `${base}<sup>${expoente}</sup>`;
             document.getElementById('ans').value = ""; 
             document.getElementById('ans').focus();
         }
 
         function check() {
-            let v = parseInt(document.getElementById('ans').value);
-            if(v === res) {
+            if(!ativo) return;
+            
+            const resposta = parseInt(document.getElementById('ans').value);
+            if(isNaN(resposta)) {
+                mostrarFeedback("Digite um número!", "error");
+                return;
+            }
+            
+            if(resposta === res) {
                 acertos++;
+                document.getElementById('acertos-count').innerHTML = acertos;
+                mostrarFeedback("🎉 ACERTOU! Dano crítico! 🎉", "success");
+                
+                // Efeito de confete
+                canvasConfetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
+                // Verifica se completou o nível
+                const acertosNecessarios = 5;
+                if(acertos >= acertosNecessarios) {
+                    // Completa o nível
+                    const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                    if(curLvl + 1 > progressoAtual && curLvl < 4) {
+                        localStorage.setItem('pot_prog_'+nomeJogador, curLvl + 1);
+                        mostrarFeedback(`🏆 PARABÉNS! Nível ${curLvl + 2} desbloqueado! 🏆`, "success");
+                        canvasConfetti({
+                            particleCount: 300,
+                            spread: 100,
+                            origin: { y: 0.5 }
+                        });
+                    }
+                    
+                    if(curLvl < 4) {
+                        curLvl++;
+                        vida = 100;
+                        acertos = 0;
+                        document.getElementById('nivel-atual').innerHTML = curLvl + 1;
+                        document.getElementById('acertos-count').innerHTML = "0";
+                        document.getElementById('life-bar').style.width = "100%";
+                        document.getElementById('vida-valor').innerHTML = "100";
+                        mostrarFeedback(`✨ AVANÇOU PARA O NÍVEL ${curLvl + 1}! ✨`, "success");
+                    } else {
+                        // Zerou o jogo!
+                        mostrarFeedback("🏆 CAMPEÃO! Você zerou o jogo! 🏆", "success");
+                        canvasConfetti({
+                            particleCount: 500,
+                            spread: 150,
+                            origin: { y: 0.5 }
+                        });
+                        setTimeout(() => {
+                            alert("PARABÉNS! Você completou todos os níveis!");
+                            sairDoJogo();
+                        }, 1000);
+                        return;
+                    }
+                }
+                
+                novaPergunta();
             } else {
                 vida -= 20;
-            }
-            document.getElementById('life-bar').style.width = Math.max(0, vida) + "%";
-            if(vida <= 0) { 
-                alert("Fim de jogo!"); 
-                location.reload(); 
-            } else {
-                rodar();
+                if(vida < 0) vida = 0;
+                
+                document.getElementById('life-bar').style.width = vida + "%";
+                document.getElementById('vida-valor').innerHTML = vida;
+                mostrarFeedback(`❌ ERROU! A resposta era ${res}. Perdeu 20 de vida! ❌`, "error");
+                
+                if(vida <= 0) { 
+                    mostrarFeedback("💀 GAME OVER! Você foi derrotado! 💀", "error");
+                    setTimeout(() => {
+                        alert(`Fim de jogo! Você acertou ${acertos} potências no nível ${curLvl+1}`);
+                        sairDoJogo();
+                    }, 1000);
+                } else {
+                    novaPergunta();
+                }
             }
         }
 
-        window.onload = renderBanners;
+        // Inicialização
+        window.onload = () => {
+            renderBanners();
+            // Seleciona o nível 0 por padrão
+            setTimeout(() => {
+                const btn0 = document.getElementById('btn-0');
+                if(btn0) btn0.classList.add('lvl-selected');
+            }, 100);
+        };
+        
+        // Permite enviar com Enter
+        document.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') {
+                check();
+            }
+        });
     </script>
 </body>
 </html>
