@@ -28,8 +28,6 @@
 
         .accessibility-bar { background: #2c3e50; padding: 12px; border-radius: 15px; margin-bottom: 20px; }
         .voice-toggle { background: var(--gold); border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; }
-        .high-contrast { background: #000 !important; }
-        .high-contrast .card { background: #111; color: #fff; border: 2px solid #fff; }
 
         input[type="text"] { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-size: 1rem; margin-bottom: 15px; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
@@ -66,7 +64,6 @@
 
         <div class="accessibility-bar">
             <button id="voice-toggle" class="voice-toggle" onclick="toggleVoice()">🔊 VOZ: LIGADA</button>
-            <button class="voice-toggle" onclick="toggleHighContrast()" style="background:#34495e; color:white">🎨 CONTRASTE</button>
         </div>
 
         <strong style="color:var(--accent)">👨‍🏫 Hilário Schwanz</strong>
@@ -111,9 +108,7 @@
     <div id="admin-panel">
         <h3>📢 Configurar Banner</h3>
         <select id="ad-slot" class="admin-input" onchange="carregarCamposAdmin()">
-            <option value="1">Slot 1</option>
-            <option value="2">Slot 2</option>
-            <option value="3">Slot 3</option>
+            <option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option>
         </select>
         <input type="text" id="ad-title" placeholder="Título" class="admin-input">
         <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
@@ -183,43 +178,55 @@
 
         function rodar() {
             if(!ativo) return;
+            clearInterval(crono); // Garantia de que nenhum cronômetro anterior está rodando
+            
             let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
             let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
             res = Math.pow(b, e);
+            
             document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
-            document.getElementById('ans').value = ""; document.getElementById('ans').focus();
+            document.getElementById('ans').value = ""; 
+            document.getElementById('ans').focus();
             falar(`${b} elevado a ${e}`);
             
-            clearInterval(crono); tempo = conf[curLvl].t;
+            tempo = conf[curLvl].t;
             document.getElementById('time-txt').innerText = tempo+"s";
+            
             crono = setInterval(() => {
-                tempo--; document.getElementById('time-txt').innerText = tempo+"s";
-                if(tempo <= 0) { 
-                    vida -= conf[curLvl].d; atualizarVida(); 
-                    if(vida <= 0) finalizar(); else rodar(); 
+                tempo--;
+                document.getElementById('time-txt').innerText = tempo+"s";
+                if(tempo <= 0) {
+                    clearInterval(crono);
+                    vida -= conf[curLvl].d;
+                    atualizarVida();
+                    if(vida <= 0) finalizar(); else rodar();
                 }
             }, 1000);
         }
 
         function check() {
             if(!ativo) return;
-            let v = parseInt(document.getElementById('ans').value);
+            const input = document.getElementById('ans');
+            let v = parseInt(input.value);
             if(isNaN(v)) return;
             
-            // PARA O TEMPO IMEDIATAMENTE AO RESPONDER
-            clearInterval(crono);
+            clearInterval(crono); // Para o tempo na hora que apertou Enter/Botão
             tentativas++;
 
             if(v === res) { 
-                acertos++; falar("Certo!"); mostrarVisual('acerto'); 
+                acertos++; 
+                falar("Certo!"); 
+                mostrarVisual('acerto'); 
                 canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
             } else { 
-                vida -= conf[curLvl].d; falar("Errado!"); mostrarVisual('erro'); 
+                vida -= conf[curLvl].d; 
+                falar("Errado!"); 
+                mostrarVisual('erro'); 
             }
 
             atualizarVida();
             
-            // VAI PARA A PRÓXIMA SEM ESPERAR
+            // Verifica se o jogo deve acabar ou carregar a próxima imediatamente
             if(vida <= 0 || tentativas >= 15) {
                 finalizar();
             } else {
@@ -241,7 +248,7 @@
                 const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
             }
-            alert(`Fim! Eficiência: ${ef}%`); location.reload();
+            alert(`Fim de jogo! Eficiência: ${ef}%`); location.reload();
         }
 
         function verRanking() {
@@ -255,7 +262,6 @@
         let voiceEnabled = true;
         function falar(t) { if(voiceEnabled) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='pt-BR'; window.speechSynthesis.speak(u); } }
         function toggleVoice() { voiceEnabled = !voiceEnabled; document.getElementById('voice-toggle').innerText = voiceEnabled ? "🔊 VOZ: LIGADA" : "🔇 VOZ: DESLIGADA"; }
-        function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
         function mostrarVisual(tipo) {
             const ind = document.getElementById('visualIndicator');
             ind.innerHTML = tipo === 'acerto' ? '✅' : '❌';
