@@ -13,7 +13,7 @@
         * { box-sizing: border-box; transition: background 0.3s; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
-        /* BANNERS */
+        /* --- BANNERS EXTERNOS --- */
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
         .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; transition: opacity 0.8s; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 5; }
@@ -21,7 +21,7 @@
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; text-transform: uppercase; }
         .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; line-height: 1.3; }
 
-        /* JOGO */
+        /* --- JANELA DO JOGO (CARD) --- */
         .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; width: 100%; max-width: 500px; z-index: 10; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
         .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
@@ -32,15 +32,23 @@
 
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; background: #fdfdfd; color: var(--dark); }
         .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; font-size: 1rem; }
-        
         .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
         
+        /* --- MURAL EXTERNO --- */
+        .extra-content { width: 100%; max-width: 800px; margin-top: 50px; text-align: center; }
+        .section-title { color: var(--gold); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .mural-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .testi-card { background: #16213e; padding: 20px; border-radius: 20px; border-left: 5px solid var(--gold); text-align: left; }
+        .testi-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; display: block; }
+        .testi-text { font-size: 0.9rem; color: #eee; font-style: italic; }
+
+        /* --- OVERLAYS --- */
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; color: #333; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: 600; }
-
-        footer { margin-top: 40px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 25px; z-index: 2000; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
         .admin-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; }
+
+        footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -66,15 +74,15 @@
             <div class="avatar-option" onclick="selAvatar(this, '🔥')">🔥</div>
         </div>
 
-        <div id="lvls" style="margin-top: 10px;">
-            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>Nível 1 (Fácil)</span> <span id="l0">🔓</span></div>
+        <div id="lvls">
+            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>Nível 1</span> <span>🔓</span></div>
             <div class="lvl-btn" id="btn-1" onclick="selecionarNivel(1)"><span>Nível 2</span> <span id="l1">🔒</span></div>
-            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>Nível 3 (Médio)</span> <span id="l2">🔒</span></div>
+            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>Nível 3</span> <span id="l2">🔒</span></div>
             <div class="lvl-btn" id="btn-3" onclick="selecionarNivel(3)"><span>Nível 4</span> <span id="l3">🔒</span></div>
-            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>Nível 5 (Mestre)</span> <span id="l4">🔒</span></div>
+            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>Nível 5</span> <span id="l4">🔒</span></div>
         </div>
 
-        <button class="btn-main" onclick="tentarIniciar()">INICIAR JOGO</button>
+        <button class="btn-main" onclick="tentarIniciar()">INICIAR</button>
         <button class="btn-main" style="background:var(--gold); color:var(--dark)" onclick="verRanking()">🏆 RANKING</button>
     </div>
 
@@ -91,6 +99,20 @@
         <button class="btn-main" onclick="check()">ATACAR!</button>
     </div>
 
+    <div class="extra-content">
+        <h3 class="section-title">Mural de Campeões</h3>
+        <div class="mural-grid">
+            <div class="testi-card">
+                <span class="testi-name">Aviso do Professor</span>
+                <p class="testi-text">Domine as potências para desbloquear novos níveis e subir no ranking!</p>
+            </div>
+            <div class="testi-card">
+                <span class="testi-name">ZELAYCE</span>
+                <p class="testi-text">O sabor que refresca sua inteligência.</p>
+            </div>
+        </div>
+    </div>
+
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
@@ -103,21 +125,19 @@
         <input type="text" id="ad-title" placeholder="Nome" class="admin-input">
         <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
         <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
-        <input type="text" id="ad-link" placeholder="Link (Instagram/WhatsApp)" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link Destino" class="admin-input">
         <button class="btn-main" onclick="salvarGeral()">SALVAR</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
 
     <script>
         let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
-        
-        // Configuração dos 5 níveis: [Tempo por questão, Dano por erro, Base Máxima, Expoente Máximo]
         const conf = [
-            {t: 12, d: 20, bm: 5, em: 2}, // Nível 1: Bases até 5, expoente 2
-            {t: 10, d: 25, bm: 10, em: 2}, // Nível 2: Bases até 10, expoente 2
-            {t: 10, d: 25, bm: 5, em: 3}, // Nível 3: Bases até 5, expoente 3
-            {t: 8, d: 34, bm: 12, em: 2}, // Nível 4: Bases até 12, expoente 2
-            {t: 8, d: 34, bm: 10, em: 3}  // Nível 5: Bases até 10, expoente 3
+            {t: 12, d: 20, bm: 5, em: 2}, 
+            {t: 10, d: 25, bm: 10, em: 2}, 
+            {t: 10, d: 25, bm: 5, em: 3}, 
+            {t: 8, d: 34, bm: 12, em: 2}, 
+            {t: 8, d: 34, bm: 10, em: 3}
         ];
 
         function renderBanners() {
@@ -155,21 +175,24 @@
         function validarProgresso() {
             const n = document.getElementById('nome-aluno').value.trim();
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
-            for(let i=1; i<=4; i++) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒";
+            for(let i=1; i<=4; i++) {
+                const el = document.getElementById('l'+i);
+                if(el) el.innerText = p >= i ? "🔓" : "🔒";
+            }
         }
 
         function selecionarNivel(l) {
             const n = document.getElementById('nome-aluno').value.trim();
             if(!n) return alert("Digite seu nome!");
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
-            if(l > p) return alert("Vença o nível anterior!");
+            if(l > p) return alert("Nível Bloqueado!");
             curLvl = l;
             document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
             document.getElementById('btn-'+l).style.background = "#eee";
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return alert("Nome!");
+            if(document.getElementById('nome-aluno').value.length < 3) return;
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -184,7 +207,6 @@
             res = Math.pow(base, exp);
             document.getElementById('q-box').innerHTML = `${base}<sup>${exp}</sup>`;
             document.getElementById('ans').value = ""; document.getElementById('ans').focus();
-            
             clearInterval(crono); tempo = conf[curLvl].t;
             document.getElementById('time-txt').innerText = tempo+"s";
             crono = setInterval(() => {
@@ -196,8 +218,7 @@
         function check() {
             let v = parseInt(document.getElementById('ans').value); if(isNaN(v)) return;
             tentativas++;
-            if(v === res) { acertos++; }
-            else { vida -= conf[curLvl].d; }
+            if(v === res) acertos++; else vida -= conf[curLvl].d;
             atualizarVida();
             if(vida <= 0 || tentativas >= 15) finalizar(); else rodar();
         }
@@ -208,23 +229,20 @@
             ativo = false; clearInterval(crono);
             const n = document.getElementById('nome-aluno').value.trim();
             const ef = Math.round((acertos/tentativas)*100) || 0;
-            
             let r = JSON.parse(localStorage.getItem('p_rank')) || [];
             r.push({nome: n, avatar: avatarSel, efic: ef, lvl: (curLvl+1)});
             r.sort((a,b) => b.efic - a.efic);
             localStorage.setItem('p_rank', JSON.stringify(r.slice(0,10)));
-
             if(vida > 0) {
                 const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
-                if(curLvl === 4 && ef >= 80) confetti();
             }
-            alert(`Fim! Eficiência: ${ef}%`); location.reload();
+            alert(`Fim! Precisão: ${ef}%`); location.reload();
         }
 
         function verRanking() {
             const r = JSON.parse(localStorage.getItem('p_rank')) || [];
-            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes!";
+            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes";
             document.getElementById('ranking-box').style.display='block';
         }
 
