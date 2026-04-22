@@ -4,53 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalha das Potências</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
             --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
         }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; transition: background 0.3s; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
         /* BANNERS */
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
         .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; transition: opacity 0.8s; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 5; }
-        .slide img { height: 80px; width: 80px; border-radius: 12px; margin-right: 20px; border: 2px solid var(--gold); object-fit: cover; }
+        .slide img { height: 80px; width: 80px; object-fit: cover; border-radius: 12px; margin-right: 20px; border: 2px solid var(--gold); }
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; text-transform: uppercase; }
         .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; }
 
-        /* CARD JOGO */
-        .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); width: 100%; max-width: 500px; }
-        .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; }
-        .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; }
-        .power-display { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
-        #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; }
-
-        /* PAINEL ADMIN */
-        #admin-panel { 
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; 
-            width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 3px solid var(--primary);
-        }
-        .admin-label { display: block; font-size: 14px; color: #444; margin-bottom: 8px; font-weight: bold; }
+        /* JOGO */
+        .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; width: 100%; max-width: 500px; z-index: 10; }
+        .avatar-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
+        .avatar-option.selected { border-color: var(--accent); background: #fff0f1; transform: scale(1.1); }
+        .power-display { font-size: clamp(3.5rem, 12vh, 5.5rem); font-weight: 900; color: var(--primary); margin: 20px 0; }
+        .power-display sup { font-size: 0.6em; color: var(--accent); }
+        #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; background: #fdfdfd; color: var(--dark); }
+        .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 12px; font-size: 1rem; }
+        .lvl-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
         
-        /* CAIXA DE SELEÇÃO DE SLOTS (SELECT) - ONDE ESTAVA A SETA VERMELHA */
-        .admin-select {
-            width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid var(--accent); 
-            border-radius: 12px; font-size: 16px; background: #f9f9f9; color: var(--primary);
-            cursor: pointer; font-weight: bold;
-        }
-
-        .admin-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 15px; }
-        
-        /* MURAL EXTERNO (A PARTE DE BAIXO QUE HAVIA SUMIDO) */
+        /* MURAL EXTERNO */
         .extra-content { width: 100%; max-width: 800px; margin-top: 50px; text-align: center; }
-        .mural-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .testi-card { background: #16213e; padding: 20px; border-radius: 20px; border-left: 5px solid var(--gold); text-align: left; }
+        .testi-card { background: #16213e; padding: 20px; border-radius: 20px; border-left: 5px solid var(--gold); text-align: left; margin-bottom: 20px; }
         .testi-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; display: block; }
         .testi-text { font-size: 0.9rem; color: #eee; font-style: italic; }
 
+        /* PAINEL ADMIN COM A CAIXA DE SELEÇÃO */
+        #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 25px; z-index: 2000; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 3px solid var(--primary); }
+        .admin-select { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid var(--accent); border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .admin-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; }
+
+        #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; color: #333; }
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
     </style>
 </head>
@@ -59,108 +52,149 @@
     <div class="banner-wrapper" id="banner-area"></div>
 
     <div id="setup-screen" class="card">
+        <div id="ranking-box">
+            <h2 style="color:var(--primary)">🏆 TOP POTÊNCIAS</h2>
+            <div id="ranking-list"></div>
+            <button class="btn-main" onclick="document.getElementById('ranking-box').style.display='none'" style="background:#888">VOLTAR</button>
+        </div>
         <strong style="color:var(--accent)">👨‍🏫 Professor Hilário</strong>
         <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
-        <input type="text" id="nome-aluno" placeholder="Digite seu nome" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;">
-        <div id="lvls" style="margin-top:20px">
-            <div class="lvl-btn">Nível 1 🔓</div>
+        <input type="text" id="nome-aluno" placeholder="Nome do Guerreiro" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;" oninput="validarProgresso()">
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selAvatar(this, '⚔️')">⚔️</div>
+            <div class="avatar-option" onclick="selAvatar(this, '🧙')">🧙</div>
+            <div class="avatar-option" onclick="selAvatar(this, '⚡')">⚡</div>
+            <div class="avatar-option" onclick="selAvatar(this, '🔥')">🔥</div>
         </div>
-        <button class="btn-main" onclick="tentarIniciar()">INICIAR JOGO</button>
+        <div id="lvls">
+            <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>Nível 1</span> <span>🔓</span></div>
+            <div class="lvl-btn" id="btn-1" onclick="selecionarNivel(1)"><span>Nível 2</span> <span id="l1">🔒</span></div>
+            <div class="lvl-btn" id="btn-2" onclick="selecionarNivel(2)"><span>Nível 3</span> <span id="l2">🔒</span></div>
+            <div class="lvl-btn" id="btn-3" onclick="selecionarNivel(3)"><span>Nível 4</span> <span id="l3">🔒</span></div>
+            <div class="lvl-btn" id="btn-4" onclick="selecionarNivel(4)"><span>Nível 5</span> <span id="l4">🔒</span></div>
+        </div>
+        <button class="btn-main" onclick="tentarIniciar()">INICIAR</button>
+        <button class="btn-main" style="background:var(--gold); color:var(--dark)" onclick="verRanking()">🏆 RANKING</button>
+    </div>
+
+    <div id="game-screen" class="card" style="display:none;">
+        <div id="life-container" style="width:100%; background:#eee; height:15px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
+            <div id="life-bar" style="width:100%; height:100%; background:var(--success);"></div>
+        </div>
+        <div id="q-box" class="power-display">?<sup>?</sup></div>
+        <input type="number" id="ans" inputmode="numeric">
+        <button class="btn-main" onclick="check()">ATACAR!</button>
     </div>
 
     <div class="extra-content">
-        <h3 style="color: var(--gold); text-transform: uppercase;">Mural de Campeões</h3>
-        <div class="mural-grid">
-            <div class="testi-card">
-                <span class="testi-name">Aviso do Professor</span>
-                <p class="testi-text">Domine as potências para desbloquear novos níveis!</p>
-            </div>
-            <div class="testi-card">
-                <span class="testi-name">BEER FOOD TRUCK</span>
-                <p class="testi-text">O melhor lanche da região para recarregar as energias!</p>
-            </div>
+        <div class="testi-card">
+            <span class="testi-name">Aviso do Professor</span>
+            <p class="testi-text">Domine as potências para desbloquear novos níveis!</p>
         </div>
     </div>
 
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
-        <h3 style="margin-top:0; text-align:center; color:var(--primary)">Configurar Banners</h3>
-        
-        <label class="admin-label">Selecione o Slot para Editar:</label>
+        <h3 style="text-align:center">Configurar Banners</h3>
+        <label>Selecione o Slot para Editar:</label>
         <select id="ad-slot" class="admin-select" onchange="carregarCamposAdmin()">
-            <option value="1">Slot 1 - Principal</option>
+            <option value="1">Slot 1</option>
             <option value="2">Slot 2</option>
             <option value="3">Slot 3</option>
             <option value="4">Slot 4</option>
             <option value="5">Slot 5</option>
         </select>
-
-        <label class="admin-label">Título / Nome do Negócio:</label>
-        <input type="text" id="ad-title" placeholder="Ex: BEER FOOD TRUK" class="admin-input">
-        
-        <label class="admin-label">Descrição / Chamada:</label>
-        <input type="text" id="ad-desc" placeholder="Texto do anúncio..." class="admin-input">
-        
-        <label class="admin-label">URL da Imagem:</label>
-        <input type="text" id="ad-img" placeholder="https://..." class="admin-input">
-        
-        <label class="admin-label">Link de Destino:</label>
-        <input type="text" id="ad-link" placeholder="WhatsApp ou Instagram" class="admin-input">
-        
-        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR ALTERAÇÕES</button>
+        <input type="text" id="ad-title" placeholder="Nome do Negócio" class="admin-input">
+        <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
+        <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link (WhatsApp/Insta)" class="admin-input">
+        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
 
     <script>
-        let slideIdx = 0;
+        let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
+        const conf = [{t:12,d:20,bm:5,em:2},{t:10,d:25,bm:10,em:2},{t:10,d:25,bm:5,em:3},{t:8,d:34,bm:12,em:2},{t:8,d:34,bm:10,em:3}];
 
+        // ADMIN E BANNERS
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
             const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
-            document.getElementById('ad-title').value = d.title;
-            document.getElementById('ad-desc').value = d.desc;
-            document.getElementById('ad-img').value = d.url;
-            document.getElementById('ad-link').value = d.link;
+            document.getElementById('ad-title').value = d.title; document.getElementById('ad-desc').value = d.desc;
+            document.getElementById('ad-img').value = d.url; document.getElementById('ad-link').value = d.link;
         }
-
         function salvarGeral() {
             const slot = document.getElementById('ad-slot').value;
-            const obj = { 
-                title: document.getElementById('ad-title').value, 
-                desc: document.getElementById('ad-desc').value, 
-                url: document.getElementById('ad-img').value, 
-                link: document.getElementById('ad-link').value 
-            };
-            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj));
-            alert("Salvo com sucesso!");
-            location.reload();
+            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
+            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj)); location.reload();
         }
-
-        function abrirAdmin() { 
-            if(prompt("Senha:") === "Food2024@") {
-                document.getElementById('admin-panel').style.display='block';
-                carregarCamposAdmin();
-            }
-        }
-
+        function abrirAdmin() { if(prompt("Senha:") === "Food2024@") { document.getElementById('admin-panel').style.display='block'; carregarCamposAdmin(); } }
         function renderBanners() {
             const area = document.getElementById('banner-area');
             let h = ''; let c = 0;
             for(let i=1; i<=5; i++) {
                 const d = JSON.parse(localStorage.getItem('pot_ad_'+i));
-                if(d && d.title) {
-                    h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
-                    c++;
-                }
+                if(d && d.title) { h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`; c++; }
             }
-            if(c === 0) { area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANÚNCIOS AQUI</p></div>'; }
-            else {
-                area.innerHTML = h; const slides = area.querySelectorAll('.slide'); slides[0].classList.add('active');
-                if(c > 1) setInterval(() => { slides[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % slides.length; slides[slideIdx].classList.add('active'); }, 5000);
-            }
+            if(c>0) { area.innerHTML = h; const s = area.querySelectorAll('.slide'); s[0].classList.add('active'); if(c>1) setInterval(() => { s[slideIdx].classList.remove('active'); slideIdx = (slideIdx+1)%s.length; s[slideIdx].classList.add('active'); }, 5000); }
         }
 
+        // JOGO ORIGINAL
+        function validarProgresso() {
+            const n = document.getElementById('nome-aluno').value.trim();
+            const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
+            for(let i=1; i<=4; i++) { if(document.getElementById('l'+i)) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒"; }
+        }
+        function selecionarNivel(l) {
+            const n = document.getElementById('nome-aluno').value.trim();
+            if(!n) return alert("Digite seu nome!");
+            if(l > (parseInt(localStorage.getItem('pot_prog_'+n)) || 0)) return alert("Bloqueado!");
+            curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
+            document.getElementById('btn-'+l).style.background = "#eee";
+        }
+        function tentarIniciar() {
+            if(document.getElementById('nome-aluno').value.length < 3) return;
+            document.getElementById('setup-screen').style.display='none';
+            document.getElementById('game-screen').style.display='block';
+            vida=100; acertos=0; tentativas=0; ativo=true; rodar();
+        }
+        function rodar() {
+            if(!ativo) return;
+            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
+            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
+            res = Math.pow(b, e);
+            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
+            document.getElementById('ans').value = ""; document.getElementById('ans').focus();
+            clearInterval(crono); tempo = conf[curLvl].t;
+            crono = setInterval(() => { tempo--; if(tempo <= 0) { vida -= conf[curLvl].d; atualizarVida(); if(vida <= 0) finalizar(); else rodar(); } }, 1000);
+        }
+        function check() {
+            let v = parseInt(document.getElementById('ans').value); if(isNaN(v)) return;
+            tentativas++; if(v === res) acertos++; else vida -= conf[curLvl].d;
+            atualizarVida(); if(vida <= 0 || tentativas >= 15) finalizar(); else rodar();
+        }
+        function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
+        function finalizar() {
+            ativo = false; clearInterval(crono);
+            const n = document.getElementById('nome-aluno').value.trim();
+            const ef = Math.round((acertos/tentativas)*100) || 0;
+            let r = JSON.parse(localStorage.getItem('pot_rank')) || [];
+            r.push({nome: n, efic: ef, lvl: (curLvl+1)});
+            r.sort((a,b) => b.efic - a.efic);
+            localStorage.setItem('pot_rank', JSON.stringify(r.slice(0,10)));
+            if(vida > 0) {
+                const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
+                if(curLvl >= p) localStorage.setItem('pot_prog_'+n, curLvl + 1);
+            }
+            alert(`Fim! Eficácia: ${ef}%`); location.reload();
+        }
+        function verRanking() {
+            const r = JSON.parse(localStorage.getItem('pot_rank')) || [];
+            document.getElementById('ranking-list').innerHTML = r.map(i => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${i.nome}</b>: ${i.efic}% (Niv ${i.lvl})</div>`).join('') || "Sem recordes";
+            document.getElementById('ranking-box').style.display='block';
+        }
+        function selAvatar(el, icon) { document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); avatarSel = icon; }
         window.onload = renderBanners;
     </script>
 </body>
