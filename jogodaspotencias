@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZELAYCE - Jogo das Potências</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #game-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; border: 4px solid #007bff; }
+        h1 { color: #007bff; font-size: 24px; margin-bottom: 20px; }
+        #display-area { font-size: 48px; font-weight: bold; margin: 20px 0; color: #333; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 15px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; background-color: #007bff; color: white; transition: 0.3s; }
+        button:hover { background-color: #0056b3; transform: scale(1.05); }
+        #feedback { margin-top: 15px; font-weight: bold; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>Desafio de Potências</h1>
+    <div id="display-area">2³</div>
+    
+    <div class="options">
+        <button onclick="checkAnswer(this)">6</button>
+        <button onclick="checkAnswer(this)">8</button>
+        <button onclick="checkAnswer(this)">9</button>
+        <button onclick="checkAnswer(this)">12</button>
+    </div>
+    
+    <div id="feedback"></div>
+</div>
+
+<script>
+    // Aqui deves inserir a lógica do jogo (JavaScript) que fizemos antes
+    // Exemplo de como a lógica se conecta com a estrutura:
+    function checkAnswer(btn) {
+        const feedback = document.getElementById('feedback');
+        if(btn.innerText === "8") {
+            feedback.innerText = "Correto! 🎉";
+            feedback.style.color = "green";
+        } else {
+            feedback.innerText = "Tenta novamente! ❌";
+            feedback.style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>
