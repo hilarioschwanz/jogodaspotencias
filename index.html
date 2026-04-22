@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha das Potências - Com Ranking</title>
+    <title>Batalha das Potências - Com Voz e Acessibilidade</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
@@ -34,12 +34,21 @@
         #ans:focus { outline: none; border-color: var(--accent); }
         
         /* INFOS DO JOGO */
-        .game-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 15px; }
-        .info-item { text-align: center; flex: 1; }
+        .game-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 15px; flex-wrap: wrap; }
+        .info-item { text-align: center; flex: 1; min-width: 60px; }
         .info-label { font-size: 12px; color: #666; }
         .info-value { font-size: 20px; font-weight: bold; color: var(--primary); }
         .timer { font-size: 24px; font-weight: bold; color: var(--accent); font-family: monospace; }
 
+        /* CONTROLES DE ACESSIBILIDADE */
+        .accessibility-bar { background: #2c3e50; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+        .voice-control { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .voice-select { padding: 10px; border-radius: 10px; border: 2px solid var(--gold); background: white; font-size: 14px; flex: 1; min-width: 150px; }
+        .voice-toggle { background: var(--gold); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .voice-toggle.active { background: var(--success); color: white; }
+        .high-contrast { background: #000 !important; color: #fff !important; }
+        .high-contrast .card { background: #222; color: #fff; border: 2px solid #fff; }
+        
         /* RANKING */
         .ranking-section { margin-top: 30px; }
         .ranking-btn { background: var(--gold); color: #333; border: none; padding: 12px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; margin-top: 10px; }
@@ -49,9 +58,6 @@
         .ranking-name { flex: 2; font-weight: 600; }
         .ranking-score { color: var(--accent); font-weight: bold; }
         .ranking-details { font-size: 12px; color: #666; }
-        .medal-1 { color: var(--gold); }
-        .medal-2 { color: var(--silver); }
-        .medal-3 { color: var(--bronze); }
 
         /* PAINEL ADMIN */
         .admin-panel { 
@@ -61,13 +67,9 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        .admin-label { display: block; font-size: 14px; color: #444; margin-bottom: 8px; font-weight: bold; text-align: left; }
-        .admin-select, .admin-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; }
         .slots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
         .slot-card { background: #f5f5f5; padding: 10px; border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent; }
-        .slot-card:hover { transform: scale(1.05); }
         .slot-card.selected { border-color: var(--accent); background: #ffe0e5; }
-        .slot-preview { font-size: 12px; color: #666; margin-top: 5px; }
         
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; transition: color 0.2s; }
         footer:hover { color: var(--gold); }
@@ -80,9 +82,14 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        
+        .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 9999; }
+        .visual-indicator.show { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
 <body>
+
+    <div class="visual-indicator" id="visualIndicator">✅</div>
 
     <div class="banner-wrapper" id="banner-area"></div>
 
@@ -90,6 +97,18 @@
         <strong style="color:var(--accent)">👨‍🏫 Professor Hilário Schwanz</strong>
         <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
         <p style="color:#666; margin-bottom:20px">Calcule as potências e derrote os inimigos!</p>
+        
+        <!-- BARRA DE ACESSIBILIDADE -->
+        <div class="accessibility-bar">
+            <div class="voice-control">
+                <select id="voice-select" class="voice-select" onchange="selecionarVoz()">
+                    <option value="default">🎤 Voz Padrão</option>
+                </select>
+                <button id="voice-toggle" class="voice-toggle active" onclick="toggleVoice()">🔊 Narração: ATIVA</button>
+                <button onclick="toggleHighContrast()" class="voice-toggle">🎨 Alto Contraste</button>
+            </div>
+        </div>
+        
         <input type="text" id="nome-aluno" placeholder="Digite seu nome" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;" oninput="validarProgresso()">
         <div id="lvls" style="margin-top:20px">
             <div class="lvl-btn" id="btn-0" onclick="selecionarNivel(0)"><span>🌟 Nível 1</span> <span>🔓</span></div>
@@ -134,64 +153,35 @@
 
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Configurar Anúncios</footer>
 
-    <!-- PAINEL ADMIN COM SLOTS VISUAIS -->
+    <!-- PAINEL ADMIN -->
     <div id="admin-panel" class="admin-panel">
         <h3 style="margin-top:0; text-align:center">📢 Configurar Banners</h3>
-        <p style="font-size:12px; color:#666; text-align:center">Senha: Food2024@</p>
-        
-        <label class="admin-label">Selecione o Slot:</label>
         <div class="slots-grid" id="slots-grid">
-            <div class="slot-card" data-slot="1" onclick="selecionarSlotAdmin(1)">
-                <strong>Slot 1</strong>
-                <div class="slot-preview" id="preview-1">📺 Principal</div>
-            </div>
-            <div class="slot-card" data-slot="2" onclick="selecionarSlotAdmin(2)">
-                <strong>Slot 2</strong>
-                <div class="slot-preview" id="preview-2">📺 Secundário</div>
-            </div>
-            <div class="slot-card" data-slot="3" onclick="selecionarSlotAdmin(3)">
-                <strong>Slot 3</strong>
-                <div class="slot-preview" id="preview-3">📺 Terciário</div>
-            </div>
-            <div class="slot-card" data-slot="4" onclick="selecionarSlotAdmin(4)">
-                <strong>Slot 4</strong>
-                <div class="slot-preview" id="preview-4">📺 Quarto</div>
-            </div>
-            <div class="slot-card" data-slot="5" onclick="selecionarSlotAdmin(5)">
-                <strong>Slot 5</strong>
-                <div class="slot-preview" id="preview-5">📺 Quinto</div>
-            </div>
+            <div class="slot-card" data-slot="1" onclick="selecionarSlotAdmin(1)"><strong>Slot 1</strong><div class="slot-preview" id="preview-1">📺</div></div>
+            <div class="slot-card" data-slot="2" onclick="selecionarSlotAdmin(2)"><strong>Slot 2</strong><div class="slot-preview" id="preview-2">📺</div></div>
+            <div class="slot-card" data-slot="3" onclick="selecionarSlotAdmin(3)"><strong>Slot 3</strong><div class="slot-preview" id="preview-3">📺</div></div>
+            <div class="slot-card" data-slot="4" onclick="selecionarSlotAdmin(4)"><strong>Slot 4</strong><div class="slot-preview" id="preview-4">📺</div></div>
+            <div class="slot-card" data-slot="5" onclick="selecionarSlotAdmin(5)"><strong>Slot 5</strong><div class="slot-preview" id="preview-5">📺</div></div>
         </div>
-
-        <label class="admin-label">🏷️ Título / Nome do Negócio:</label>
-        <input type="text" id="ad-title" placeholder="Ex: BEER FOOD TRUCK" class="admin-input">
-        
-        <label class="admin-label">📝 Descrição / Chamada:</label>
-        <input type="text" id="ad-desc" placeholder="Frase do anúncio..." class="admin-input">
-        
-        <label class="admin-label">🖼️ URL da Imagem:</label>
-        <input type="text" id="ad-img" placeholder="https://link-da-imagem.jpg" class="admin-input">
-        
-        <label class="admin-label">🔗 Link de Destino:</label>
-        <input type="text" id="ad-link" placeholder="https://instagram.com/..." class="admin-input">
-        
-        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">💾 SALVAR ALTERAÇÕES</button>
+        <input type="text" id="ad-title" placeholder="Título" class="admin-input">
+        <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
+        <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link" class="admin-input">
+        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">💾 SALVAR</button>
         <button class="btn-main" style="background:#888" onclick="fecharAdmin()">❌ FECHAR</button>
     </div>
 
     <!-- MODAL DE RANKING -->
     <div id="ranking-modal" class="ranking-modal">
-        <h2 style="text-align:center; margin-top:0">🏆 RANKING GLOBAL 🏆</h2>
+        <h2 style="text-align:center">🏆 RANKING GLOBAL 🏆</h2>
         <div id="ranking-list"></div>
-        <button class="btn-main" onclick="fecharRanking()" style="background:#666; margin-top:20px">FECHAR</button>
+        <button class="btn-main" onclick="fecharRanking()" style="background:#666">FECHAR</button>
     </div>
 
     <script>
         let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, erros = 0, slideIdx = 0;
-        let nomeJogador = "";
-        let tempoInicio = 0;
-        let timerInterval = null;
-        let slotSelecionadoAdmin = 1;
+        let nomeJogador = "", tempoInicio = 0, timerInterval = null, slotSelecionadoAdmin = 1;
+        let voiceEnabled = true, synthesis = window.speechSynthesis, selectedVoice = null;
         
         const conf = [
             {t:12, d:20, bm:5, em:2, nome:"Iniciante"},
@@ -201,459 +191,333 @@
             {t:8, d:34, bm:10, em:3, nome:"Lendário"}
         ];
 
-        function mostrarFeedback(mensagem, tipo) {
-            const feedback = document.createElement('div');
-            feedback.className = `feedback feedback-${tipo}`;
-            feedback.textContent = mensagem;
-            document.body.appendChild(feedback);
-            setTimeout(() => feedback.remove(), 2000);
+        // ========== SISTEMA DE NARRAÇÃO ==========
+        function falar(texto) {
+            if(!voiceEnabled) return;
+            if(synthesis.speaking) synthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            if(selectedVoice) utterance.voice = selectedVoice;
+            synthesis.speak(utterance);
         }
-
+        
+        function carregarVozes() {
+            const vozes = synthesis.getVoices();
+            const select = document.getElementById('voice-select');
+            const vozesPT = vozes.filter(v => v.lang.includes('pt') || v.lang.includes('PT'));
+            const vozesDisp = vozesPT.length > 0 ? vozesPT : vozes;
+            
+            select.innerHTML = '<option value="default">🎤 Voz Padrão</option>';
+            vozesDisp.forEach((voz, i) => {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${voz.name} (${voz.lang})`;
+                select.appendChild(option);
+            });
+        }
+        
+        function selecionarVoz() {
+            const index = document.getElementById('voice-select').value;
+            if(index !== 'default') {
+                const vozes = synthesis.getVoices();
+                const vozesPT = vozes.filter(v => v.lang.includes('pt'));
+                const vozesDisp = vozesPT.length > 0 ? vozesPT : vozes;
+                selectedVoice = vozesDisp[parseInt(index)];
+            } else {
+                selectedVoice = null;
+            }
+        }
+        
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const btn = document.getElementById('voice-toggle');
+            btn.textContent = voiceEnabled ? "🔊 Narração: ATIVA" : "🔇 Narração: DESATIVADA";
+            btn.classList.toggle('active', voiceEnabled);
+            if(voiceEnabled) falar("Narração ativada!");
+            else falar("Narração desativada");
+        }
+        
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+        
+        function mostrarVisual(tipo) {
+            const indicator = document.getElementById('visualIndicator');
+            if(tipo === 'acerto') {
+                indicator.innerHTML = '✅';
+                indicator.style.color = '#27ae60';
+            } else if(tipo === 'erro') {
+                indicator.innerHTML = '❌';
+                indicator.style.color = '#e74c3c';
+            } else if(tipo === 'nivel') {
+                indicator.innerHTML = '⭐';
+                indicator.style.color = '#f1c40f';
+            } else if(tipo === 'ranking') {
+                indicator.innerHTML = '🏆';
+                indicator.style.color = '#f1c40f';
+            }
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 500);
+        }
+        
+        // ========== SISTEMA DE RANKING ==========
+        function calcularPontuacao() {
+            const tempoDecorrido = Math.floor((Date.now() - tempoInicio) / 1000);
+            const totalQuestoes = acertos + erros;
+            const percentualAcertos = totalQuestoes > 0 ? (acertos / totalQuestoes) * 100 : 0;
+            let pontuacao = (acertos * 100) - (erros * 50) - Math.floor(tempoDecorrido / 5);
+            pontuacao = Math.max(0, pontuacao);
+            return { pontuacao, percentualAcertos: percentualAcertos.toFixed(1), tempo: tempoDecorrido, acertos, erros, nivel: curLvl + 1 };
+        }
+        
+        function obterPosicaoRanking() {
+            const ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
+            const posicao = ranking.findIndex(r => r.nome === nomeJogador) + 1;
+            return posicao > 0 ? posicao : null;
+        }
+        
+        function salvarRanking() {
+            const resultado = calcularPontuacao();
+            let ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
+            const idx = ranking.findIndex(r => r.nome === nomeJogador);
+            
+            if(idx !== -1) {
+                if(resultado.pontuacao > ranking[idx].pontuacao) {
+                    ranking[idx] = { ...ranking[idx], ...resultado, data: new Date().toISOString() };
+                }
+            } else {
+                ranking.push({ nome: nomeJogador, ...resultado, data: new Date().toISOString() });
+            }
+            
+            ranking.sort((a, b) => b.pontuacao - a.pontuacao);
+            if(ranking.length > 50) ranking = ranking.slice(0, 50);
+            localStorage.setItem('pot_ranking', JSON.stringify(ranking));
+            
+            const posicao = ranking.findIndex(r => r.nome === nomeJogador) + 1;
+            falar(`Parabéns ${nomeJogador}! Você alcançou ${resultado.pontuacao} pontos e ficou em ${posicao}º lugar no ranking!`);
+            mostrarVisual('ranking');
+            return posicao;
+        }
+        
+        function mostrarRanking() {
+            const ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
+            const rankingList = document.getElementById('ranking-list');
+            
+            if(ranking.length === 0) {
+                rankingList.innerHTML = '<p style="text-align:center; color:#666;">Nenhum jogador no ranking ainda.</p>';
+            } else {
+                let html = '';
+                ranking.forEach((jogador, idx) => {
+                    let medalha = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : `#${idx+1} `;
+                    html += `<div class="ranking-item"><div class="ranking-position">${medalha}</div><div class="ranking-name">${jogador.nome}</div><div class="ranking-score">${jogador.pontuacao} pts</div><div class="ranking-details">${jogador.percentualAcertos}%<br>Nv${jogador.nivel}</div></div>`;
+                });
+                rankingList.innerHTML = html;
+            }
+            document.getElementById('ranking-modal').style.display = 'block';
+        }
+        
+        function fecharRanking() { document.getElementById('ranking-modal').style.display = 'none'; }
+        
+        // ========== BANNERS ==========
         function renderBanners() {
             const area = document.getElementById('banner-area');
             let slides = [];
-            
             for(let i=1; i<=5; i++) {
                 const dados = localStorage.getItem('pot_ad_'+i);
                 if(dados) {
                     try {
                         const d = JSON.parse(dados);
-                        if(d && d.title && d.title.trim() !== "") {
-                            slides.push(d);
-                        }
+                        if(d && d.title) slides.push(d);
                     } catch(e) {}
                 }
             }
-            
-            if(slides.length === 0) { 
-                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">📢 ANÚNCIOS AQUI</p><p style="font-size:12px">Clique no rodapé para configurar</p></div>'; 
-                return;
-            }
+            if(slides.length === 0) { area.innerHTML = '<div class="slide active">📢 Anúncios Aqui</div>'; return; }
             
             let html = '';
-            slides.forEach((slide, idx) => {
-                html += `<div class="slide" onclick="window.open('${slide.link || '#'}', '_blank')">
-                            <img src="${slide.url || 'https://via.placeholder.com/80'}" onerror="this.src='https://via.placeholder.com/80'">
-                            <div class="slide-info">
-                                <p class="slide-title">${escapeHtml(slide.title)}</p>
-                                <p class="slide-text">${escapeHtml(slide.desc || '')}</p>
-                            </div>
-                         </div>`;
+            slides.forEach(slide => {
+                html += `<div class="slide" onclick="window.open('${slide.link || '#'}')"><img src="${slide.url}" onerror="this.src='https://via.placeholder.com/80'"><div><p class="slide-title">${slide.title}</p><p class="slide-text">${slide.desc || ''}</p></div></div>`;
             });
             area.innerHTML = html;
-            
-            const slidesElements = area.querySelectorAll('.slide');
-            if(slidesElements.length > 0) {
-                slidesElements[0].classList.add('active');
-                if(slidesElements.length > 1) {
-                    setInterval(() => {
-                        slidesElements[slideIdx].classList.remove('active');
-                        slideIdx = (slideIdx + 1) % slidesElements.length;
-                        slidesElements[slideIdx].classList.add('active');
-                    }, 5000);
-                }
+            const slidesEl = area.querySelectorAll('.slide');
+            if(slidesEl.length) {
+                slidesEl[0].classList.add('active');
+                if(slidesEl.length > 1) setInterval(() => {
+                    slidesEl[slideIdx].classList.remove('active');
+                    slideIdx = (slideIdx + 1) % slidesEl.length;
+                    slidesEl[slideIdx].classList.add('active');
+                }, 5000);
             }
         }
         
-        function escapeHtml(text) {
-            if(!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function abrirAdmin() { 
-            const senha = prompt("Digite a senha do administrador:");
-            if(senha === "Food2024@") {
-                document.getElementById('admin-panel').style.display='block';
-                atualizarPreviewsSlots();
-                selecionarSlotAdmin(slotSelecionadoAdmin);
-            } else if(senha !== null) {
-                mostrarFeedback("Senha incorreta!", "error");
-            }
-        }
+        function abrirAdmin() { if(prompt("Senha:") === "Food2024@") { document.getElementById('admin-panel').style.display='block'; atualizarPreviews(); selecionarSlotAdmin(1); } }
+        function fecharAdmin() { document.getElementById('admin-panel').style.display='none'; }
         
-        function fecharAdmin() {
-            document.getElementById('admin-panel').style.display='none';
-        }
-        
-        function atualizarPreviewsSlots() {
+        function atualizarPreviews() {
             for(let i=1; i<=5; i++) {
-                const dados = localStorage.getItem('pot_ad_'+i);
-                let preview = "📺 Vazio";
-                if(dados) {
-                    try {
-                        const d = JSON.parse(dados);
-                        if(d && d.title) preview = d.title.substring(0, 15);
-                    } catch(e) {}
-                }
-                const previewEl = document.getElementById(`preview-${i}`);
-                if(previewEl) previewEl.textContent = preview;
+                const d = JSON.parse(localStorage.getItem('pot_ad_'+i) || '{}');
+                document.getElementById(`preview-${i}`).innerHTML = d.title ? d.title.substring(0,10) : '📺 Vazio';
             }
         }
         
         function selecionarSlotAdmin(slot) {
             slotSelecionadoAdmin = slot;
-            document.querySelectorAll('.slot-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
             document.querySelector(`.slot-card[data-slot="${slot}"]`).classList.add('selected');
-            
-            const dados = localStorage.getItem('pot_ad_'+slot);
-            let d = { title: "", desc: "", url: "", link: "" };
-            if(dados) {
-                try {
-                    d = JSON.parse(dados);
-                } catch(e) {}
-            }
-            document.getElementById('ad-title').value = d.title || "";
-            document.getElementById('ad-desc').value = d.desc || "";
-            document.getElementById('ad-img').value = d.url || "";
-            document.getElementById('ad-link').value = d.link || "";
+            const d = JSON.parse(localStorage.getItem('pot_ad_'+slot) || '{}');
+            document.getElementById('ad-title').value = d.title || '';
+            document.getElementById('ad-desc').value = d.desc || '';
+            document.getElementById('ad-img').value = d.url || '';
+            document.getElementById('ad-link').value = d.link || '';
         }
-
+        
         function salvarGeral() {
-            const obj = { 
-                title: document.getElementById('ad-title').value, 
-                desc: document.getElementById('ad-desc').value, 
-                url: document.getElementById('ad-img').value, 
-                link: document.getElementById('ad-link').value 
-            };
+            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
             localStorage.setItem('pot_ad_'+slotSelecionadoAdmin, JSON.stringify(obj));
-            mostrarFeedback(`Slot ${slotSelecionadoAdmin} salvo com sucesso!`, "success");
-            atualizarPreviewsSlots();
-            setTimeout(() => {
-                renderBanners();
-            }, 500);
+            alert('Salvo!');
+            renderBanners();
+            fecharAdmin();
         }
-
+        
+        // ========== JOGO ==========
         function validarProgresso() {
             const nome = document.getElementById('nome-aluno').value.trim();
             if(!nome) return;
-            
-            const progresso = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
-            for(let i=1; i<=4; i++) { 
-                const elemento = document.getElementById('l'+i);
-                if(elemento) elemento.innerText = progresso >= i ? "🔓" : "🔒";
-            }
-            
-            if(progresso >= 0) {
-                curLvl = progresso;
-                document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected'));
-                document.getElementById('btn-'+progresso).classList.add('lvl-selected');
-            }
+            const p = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
+            for(let i=1; i<=4; i++) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒";
+            curLvl = p;
+            document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected'));
+            document.getElementById('btn-'+p)?.classList.add('lvl-selected');
         }
-
+        
         function selecionarNivel(l) {
             const nome = document.getElementById('nome-aluno').value.trim();
-            if(!nome) {
-                mostrarFeedback("Digite seu nome primeiro!", "error");
-                return;
-            }
-            
-            const progresso = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
-            if(l <= progresso) { 
-                curLvl = l; 
-                document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('lvl-selected')); 
-                document.getElementById('btn-'+l).classList.add('lvl-selected');
-                mostrarFeedback(`Nível ${l+1} selecionado!`, "success");
-            } else {
-                mostrarFeedback(`Nível ${l+1} está bloqueado!`, "error");
-            }
+            if(!nome) return alert("Digite seu nome!");
+            const p = parseInt(localStorage.getItem('pot_prog_'+nome)) || 0;
+            if(l <= p) { curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('lvl-selected')); document.getElementById('btn-'+l).classList.add('lvl-selected'); falar(`Nível ${l+1} selecionado`); }
+            else alert("Nível Bloqueado!");
         }
-
+        
         function iniciarTimer() {
             if(timerInterval) clearInterval(timerInterval);
             tempoInicio = Date.now();
-            timerInterval = setInterval(() => {
-                if(ativo) {
-                    const tempoDecorrido = Math.floor((Date.now() - tempoInicio) / 1000);
-                    document.getElementById('timer').innerHTML = tempoDecorrido + "s";
-                }
-            }, 1000);
+            timerInterval = setInterval(() => { if(ativo) document.getElementById('timer').innerHTML = Math.floor((Date.now() - tempoInicio)/1000) + "s"; }, 1000);
         }
         
-        function pararTimer() {
-            if(timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
+        function pararTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+        
+        function novaPergunta() {
+            if(!ativo) return;
+            const nivel = conf[curLvl];
+            let base = Math.floor(Math.random() * (nivel.bm - 1)) + 2;
+            let exp = Math.floor(Math.random() * (nivel.em - 1)) + 2;
+            let resultado = Math.pow(base, exp);
+            if(resultado > 10000000) { base = 5; exp = 3; resultado = 125; }
+            res = resultado;
+            document.getElementById('q-box').innerHTML = `${base}<sup>${exp}</sup>`;
+            document.getElementById('ans').value = "";
+            document.getElementById('ans').focus();
+            falar(`Calcule ${base} elevado a ${exp}`);
         }
         
-        function calcularPontuacao() {
-            const tempoDecorrido = Math.floor((Date.now() - tempoInicio) / 1000);
-            const totalQuestoes = acertos + erros;
-            const percentualAcertos = totalQuestoes > 0 ? (acertos / totalQuestoes) * 100 : 0;
-            
-            // Fórmula: (acertos * 100) - (erros * 50) - (tempo / 5)
-            // Quanto mais rápido e mais acertos, maior a pontuação
-            let pontuacao = (acertos * 100) - (erros * 50) - Math.floor(tempoDecorrido / 5);
-            pontuacao = Math.max(0, pontuacao);
-            
-            return {
-                pontuacao: pontuacao,
-                percentualAcertos: percentualAcertos.toFixed(1),
-                tempo: tempoDecorrido,
-                acertos: acertos,
-                erros: erros,
-                nivel: curLvl + 1
-            };
-        }
-        
-        function salvarRanking() {
-            const resultado = calcularPontuacao();
-            
-            // Buscar ranking existente
-            let ranking = [];
-            const rankingSalvo = localStorage.getItem('pot_ranking');
-            if(rankingSalvo) {
-                try {
-                    ranking = JSON.parse(rankingSalvo);
-                } catch(e) {}
-            }
-            
-            // Verificar se jogador já existe
-            const jogadorExistente = ranking.find(r => r.nome === nomeJogador);
-            if(jogadorExistente) {
-                // Atualiza se a nova pontuação for maior
-                if(resultado.pontuacao > jogadorExistente.pontuacao) {
-                    jogadorExistente.pontuacao = resultado.pontuacao;
-                    jogadorExistente.percentualAcertos = resultado.percentualAcertos;
-                    jogadorExistente.tempo = resultado.tempo;
-                    jogadorExistente.acertos = resultado.acertos;
-                    jogadorExistente.erros = resultado.erros;
-                    jogadorExistente.nivel = resultado.nivel;
-                    jogadorExistente.data = new Date().toISOString();
-                }
-            } else {
-                ranking.push({
-                    nome: nomeJogador,
-                    pontuacao: resultado.pontuacao,
-                    percentualAcertos: resultado.percentualAcertos,
-                    tempo: resultado.tempo,
-                    acertos: resultado.acertos,
-                    erros: resultado.erros,
-                    nivel: resultado.nivel,
-                    data: new Date().toISOString()
-                });
-            }
-            
-            // Ordenar por pontuação decrescente
-            ranking.sort((a, b) => b.pontuacao - a.pontuacao);
-            
-            // Manter apenas top 50
-            if(ranking.length > 50) ranking = ranking.slice(0, 50);
-            
-            localStorage.setItem('pot_ranking', JSON.stringify(ranking));
-        }
-        
-        function mostrarRanking() {
-            const rankingSalvo = localStorage.getItem('pot_ranking');
-            let ranking = [];
-            if(rankingSalvo) {
-                try {
-                    ranking = JSON.parse(rankingSalvo);
-                } catch(e) {}
-            }
-            
-            const rankingList = document.getElementById('ranking-list');
-            if(ranking.length === 0) {
-                rankingList.innerHTML = '<p style="text-align:center; color:#666;">Nenhum jogador no ranking ainda. Seja o primeiro!</p>';
-            } else {
-                let html = '';
-                ranking.forEach((jogador, idx) => {
-                    let medalha = '';
-                    if(idx === 0) medalha = '🥇 ';
-                    else if(idx === 1) medalha = '🥈 ';
-                    else if(idx === 2) medalha = '🥉 ';
-                    
-                    html += `
-                        <div class="ranking-item">
-                            <div class="ranking-position">${medalha}#${idx+1}</div>
-                            <div class="ranking-name">${escapeHtml(jogador.nome)}</div>
-                            <div class="ranking-score">${jogador.pontuacao} pts</div>
-                            <div class="ranking-details">
-                                ${jogador.percentualAcertos}% acertos<br>
-                                Nv${jogador.nivel}
-                            </div>
-                        </div>
-                    `;
-                });
-                rankingList.innerHTML = html;
-            }
-            
-            document.getElementById('ranking-modal').style.display = 'block';
-        }
-        
-        function fecharRanking() {
-            document.getElementById('ranking-modal').style.display = 'none';
-        }
-
         function tentarIniciar() {
             const nome = document.getElementById('nome-aluno').value.trim();
-            if(nome.length < 2) {
-                mostrarFeedback("Digite um nome válido!", "error");
-                return;
-            }
-            
+            if(nome.length < 2) return alert("Digite um nome válido!");
             nomeJogador = nome;
-            vida = 100;
-            acertos = 0;
-            erros = 0;
-            ativo = true;
-            
+            vida = 100; acertos = 0; erros = 0; ativo = true;
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
-            document.getElementById('nivel-atual').innerHTML = curLvl + 1;
+            document.getElementById('nivel-atual').innerHTML = curLvl+1;
             document.getElementById('acertos-count').innerHTML = "0";
             document.getElementById('erros-count').innerHTML = "0";
             document.getElementById('vida-valor').innerHTML = "100";
             document.getElementById('life-bar').style.width = "100%";
-            document.getElementById('timer').innerHTML = "0s";
-            
             iniciarTimer();
+            falar(`Batalha iniciada! Nível ${curLvl+1}. Vamos calcular potências!`);
             novaPergunta();
         }
         
-        function sairDoJogo() {
-            if(confirm("Tem certeza que quer sair? Sua pontuação será salva no ranking!")) {
-                pararTimer();
-                salvarRanking();
-                
-                const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                const novoProgresso = Math.max(progressoAtual, curLvl);
-                localStorage.setItem('pot_prog_'+nomeJogador, novoProgresso);
-                
-                ativo = false;
-                document.getElementById('setup-screen').style.display='block';
-                document.getElementById('game-screen').style.display='none';
-                validarProgresso();
-                mostrarFeedback(`Pontuação salva! ${calcularPontuacao().pontuacao} pontos!`, "success");
-            }
-        }
-
-        function novaPergunta() {
-            if(!ativo) return;
-            
-            const nivel = conf[curLvl];
-            const baseMin = 2;
-            const baseMax = nivel.bm;
-            const expMin = 2;
-            const expMax = nivel.em;
-            
-            let base = Math.floor(Math.random() * (baseMax - baseMin + 1)) + baseMin;
-            let expoente = Math.floor(Math.random() * (expMax - expMin + 1)) + expMin;
-            
-            let resultado = Math.pow(base, expoente);
-            if(resultado > 1000000000) {
-                base = Math.min(base, 8);
-                expoente = Math.min(expoente, 4);
-                resultado = Math.pow(base, expoente);
-            }
-            
-            res = resultado;
-            document.getElementById('q-box').innerHTML = `${base}<sup>${expoente}</sup>`;
-            document.getElementById('ans').value = ""; 
-            document.getElementById('ans').focus();
-        }
-
         function check() {
             if(!ativo) return;
-            
             const resposta = parseInt(document.getElementById('ans').value);
-            if(isNaN(resposta)) {
-                mostrarFeedback("Digite um número!", "error");
-                return;
-            }
+            if(isNaN(resposta)) { falar("Digite um número"); return; }
             
             if(resposta === res) {
                 acertos++;
                 document.getElementById('acertos-count').innerHTML = acertos;
-                mostrarFeedback("🎉 ACERTOU! Dano crítico! 🎉", "success");
+                falar(`Parabéns! ${res} está correto! Acerto número ${acertos}`);
+                mostrarVisual('acerto');
+                canvasConfetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
                 
-                canvasConfetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-                
-                const acertosNecessarios = 5;
-                if(acertos >= acertosNecessarios) {
-                    const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                    if(curLvl + 1 > progressoAtual && curLvl < 4) {
-                        localStorage.setItem('pot_prog_'+nomeJogador, curLvl + 1);
-                        mostrarFeedback(`🏆 PARABÉNS! Nível ${curLvl + 2} desbloqueado! 🏆`, "success");
-                        canvasConfetti({
-                            particleCount: 300,
-                            spread: 100,
-                            origin: { y: 0.5 }
-                        });
-                    }
-                    
+                if(acertos >= 5) {
                     if(curLvl < 4) {
                         curLvl++;
-                        vida = 100;
-                        acertos = 0;
-                        document.getElementById('nivel-atual').innerHTML = curLvl + 1;
+                        const progresso = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                        if(curLvl > progresso) localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
+                        vida = 100; acertos = 0;
+                        document.getElementById('nivel-atual').innerHTML = curLvl+1;
                         document.getElementById('acertos-count').innerHTML = "0";
                         document.getElementById('life-bar').style.width = "100%";
                         document.getElementById('vida-valor').innerHTML = "100";
-                        mostrarFeedback(`✨ AVANÇOU PARA O NÍVEL ${curLvl + 1}! ✨`, "success");
+                        falar(`Incrível! Você avançou para o Nível ${curLvl+1}! Parabéns!`);
+                        mostrarVisual('nivel');
+                        canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                     } else {
                         pararTimer();
-                        const resultado = calcularPontuacao();
-                        mostrarFeedback(`🏆 CAMPEÃO! Pontuação: ${resultado.pontuacao} pontos! 🏆`, "success");
-                        canvasConfetti({
-                            particleCount: 500,
-                            spread: 150,
-                            origin: { y: 0.5 }
-                        });
-                        salvarRanking();
-                        setTimeout(() => {
-                            alert(`PARABÉNS! Você completou todos os níveis!\nPontuação: ${resultado.pontuacao}\nAcertos: ${resultado.acertos}\nTempo: ${resultado.tempo}s`);
-                            sairDoJogo();
-                        }, 1000);
+                        const posicao = salvarRanking();
+                        falar(`PARABÉNS! Você zerou o jogo! Ficou em ${posicao}º lugar no ranking!`);
+                        mostrarVisual('ranking');
+                        canvasConfetti({ particleCount: 500, spread: 150, origin: { y: 0.5 } });
+                        setTimeout(() => { alert(`Campeão! Pontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`); sairDoJogo(); }, 2000);
                         return;
                     }
                 }
-                
                 novaPergunta();
             } else {
                 erros++;
                 vida -= 20;
                 if(vida < 0) vida = 0;
-                
                 document.getElementById('erros-count').innerHTML = erros;
                 document.getElementById('life-bar').style.width = vida + "%";
                 document.getElementById('vida-valor').innerHTML = vida;
-                mostrarFeedback(`❌ ERROU! A resposta era ${res}. Perdeu 20 de vida! ❌`, "error");
+                falar(`Errado! A resposta correta era ${res}. Você perdeu 20 de vida. Restam ${vida}%`);
+                mostrarVisual('erro');
                 
-                if(vida <= 0) { 
+                if(vida <= 0) {
                     pararTimer();
-                    const resultado = calcularPontuacao();
-                    mostrarFeedback(`💀 GAME OVER! Pontuação: ${resultado.pontuacao} pontos! 💀`, "error");
-                    salvarRanking();
-                    setTimeout(() => {
-                        alert(`Fim de jogo!\nPontuação: ${resultado.pontuacao}\nAcertos: ${acertos}\nErros: ${erros}\nTempo: ${resultado.tempo}s`);
-                        sairDoJogo();
-                    }, 1000);
+                    const posicao = salvarRanking();
+                    falar(`Game Over! Sua pontuação final foi ${calcularPontuacao().pontuacao} pontos. Posição: ${posicao}º lugar`);
+                    setTimeout(() => { alert(`Fim de jogo!\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`); sairDoJogo(); }, 2000);
                 } else {
                     novaPergunta();
                 }
             }
         }
-
+        
+        function sairDoJogo() {
+            if(confirm("Sair e salvar progresso?")) {
+                pararTimer();
+                salvarRanking();
+                const progresso = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                if(curLvl > progresso) localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
+                ativo = false;
+                document.getElementById('setup-screen').style.display='block';
+                document.getElementById('game-screen').style.display='none';
+                validarProgresso();
+                falar("Progresso salvo! Até mais!");
+            }
+        }
+        
+        // Inicialização
         window.onload = () => {
             renderBanners();
-            setTimeout(() => {
-                const btn0 = document.getElementById('btn-0');
-                if(btn0) btn0.classList.add('lvl-selected');
-            }, 100);
+            carregarVozes();
+            if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregarVozes;
+            document.getElementById('btn-0')?.classList.add('lvl-selected');
         };
         
-        document.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') {
-                check();
-            }
-        });
+        document.addEventListener('keypress', e => { if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') check(); });
     </script>
 </body>
 </html>
