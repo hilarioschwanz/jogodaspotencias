@@ -104,11 +104,11 @@
         <div class="mural-grid">
             <div class="testi-card">
                 <span class="testi-name">Aviso do Professor</span>
-                <p class="testi-text">Domine as potências para desbloquear novos níveis e subir no ranking!</p>
+                <p class="testi-text">Domine as potências para desbloquear novos níveis!</p>
             </div>
             <div class="testi-card">
                 <span class="testi-name">BEER FOOD TRUCK</span>
-                <p class="testi-text">O melhor lanche da região para recarregar as energias após o desafio!</p>
+                <p class="testi-text">O melhor lanche da região para recarregar as energias!</p>
             </div>
         </div>
     </div>
@@ -116,24 +116,24 @@
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
-        <h3>Configurar Banners</h3>
+        <h3>Configurar Banners (5 Slots)</h3>
         <select id="ad-slot" class="admin-input" onchange="carregarCamposAdmin()">
             <option value="1">Patrocinador 1</option>
             <option value="2">Patrocinador 2</option>
             <option value="3">Patrocinador 3</option>
+            <option value="4">Patrocinador 4</option>
+            <option value="5">Patrocinador 5</option>
         </select>
-        <input type="text" id="ad-title" placeholder="Nome" class="admin-input">
-        <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
-        <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
-        <input type="text" id="ad-link" placeholder="Link Destino" class="admin-input">
-        <button class="btn-main" onclick="salvarGeral()">SALVAR</button>
+        <input type="text" id="ad-title" placeholder="Nome do Negócio" class="admin-input">
+        <input type="text" id="ad-desc" placeholder="Promoção/Descrição" class="admin-input">
+        <input type="text" id="ad-img" placeholder="URL da Imagem (Link)" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link do WhatsApp/Insta" class="admin-input">
+        <button class="btn-main" onclick="salvarGeral()">SALVAR NESTE SLOT</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
 
     <script>
         let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
-        
-        // Configuração de Níveis: [Tempo, Dano, Base Máx, Expoente Máx]
         const conf = [
             {t: 12, d: 20, bm: 5, em: 2}, 
             {t: 10, d: 25, bm: 10, em: 2}, 
@@ -142,24 +142,42 @@
             {t: 8, d: 34, bm: 10, em: 3}
         ];
 
+        // RENDERIZAÇÃO DOS 5 BANNERS
         function renderBanners() {
             const area = document.getElementById('banner-area');
             let h = '';
-            for(let i=1; i<=3; i++) {
-                const d = JSON.parse(localStorage.getItem('pot_ad_'+i)) || { title: "Vazio", desc: "Espaço Publicitário", url: "", link: "#" };
-                h += `<div class="slide ${i===1?'active':''}" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
+            let bannersEncontrados = 0;
+            for(let i=1; i<=5; i++) {
+                const d = JSON.parse(localStorage.getItem('pot_ad_'+i));
+                if(d && d.title && d.title !== "Vazio") {
+                    h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
+                    bannersEncontrados++;
+                }
             }
-            area.innerHTML = h;
-            setInterval(() => {
-                const s = document.querySelectorAll('.slide');
-                if(!s.length) return;
-                s[slideIdx].classList.remove('active');
-                slideIdx = (slideIdx + 1) % s.length;
-                s[slideIdx].classList.add('active');
-            }, 5000);
+            if(bannersEncontrados === 0) {
+                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANUNCIE AQUI - ESPAÇO DISPONÍVEL</p></div>';
+            } else {
+                area.innerHTML = h;
+                const slides = area.querySelectorAll('.slide');
+                slides[0].classList.add('active');
+                if(bannersEncontrados > 1) {
+                    setInterval(() => {
+                        slides[slideIdx].classList.remove('active');
+                        slideIdx = (slideIdx + 1) % slides.length;
+                        slides[slideIdx].classList.add('active');
+                    }, 5000);
+                }
+            }
         }
 
-        function abrirAdmin() { if(prompt("Senha:") === "Food2024@") document.getElementById('admin-panel').style.display='block'; }
+        function abrirAdmin() { 
+            if(prompt("Senha Admin:") === "Food2024@") {
+                document.getElementById('admin-panel').style.display='block';
+                carregarCamposAdmin(); // Carrega o slot 1 por padrão
+            }
+        }
+
+        // FUNÇÃO CORRIGIDA PARA CARREGAR OS DADOS DO SLOT SELECIONADO
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
             const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
@@ -168,10 +186,18 @@
             document.getElementById('ad-img').value = d.url;
             document.getElementById('ad-link').value = d.link;
         }
+
         function salvarGeral() {
             const slot = document.getElementById('ad-slot').value;
-            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
-            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj)); location.reload();
+            const obj = { 
+                title: document.getElementById('ad-title').value, 
+                desc: document.getElementById('ad-desc').value, 
+                url: document.getElementById('ad-img').value, 
+                link: document.getElementById('ad-link').value 
+            };
+            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj));
+            alert("Slot " + slot + " atualizado!");
+            location.reload();
         }
 
         function validarProgresso() {
@@ -185,16 +211,16 @@
 
         function selecionarNivel(l) {
             const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return alert("Digite o seu nome!");
+            if(!n) return alert("Digite o nome primeiro!");
             const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            if(l > p) return alert("Nível Bloqueado!");
+            if(l > p) return alert("Bloqueado! Complete o nível anterior.");
             curLvl = l;
             document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
             document.getElementById('btn-'+l).style.background = "#eee";
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return alert("Nome muito curto!");
+            if(document.getElementById('nome-aluno').value.length < 3) return alert("Digite seu nome completo.");
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -239,12 +265,12 @@
                 const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('pot_prog_'+n, curLvl + 1);
             }
-            alert(`Fim de Jogo! Precisão: ${ef}%`); location.reload();
+            alert(`Fim! Sua eficácia foi de ${ef}%`); location.reload();
         }
 
         function verRanking() {
             const r = JSON.parse(localStorage.getItem('pot_rank')) || [];
-            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes";
+            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Aguardando recordes...";
             document.getElementById('ranking-box').style.display='block';
         }
 
