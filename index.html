@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha das Potências - Ultra Speed</title>
+    <title>Batalha das Potências - Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
             --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
+            --danger: #e74c3c;
         }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
@@ -25,21 +26,22 @@
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #333; font-weight: bold; }
 
-        .voice-toggle { background: var(--gold); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; }
+        .accessibility-bar { background: #2c3e50; padding: 12px; border-radius: 15px; margin-bottom: 20px; width: 100%; display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .voice-toggle { background: var(--gold); border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; font-size: 0.8rem; }
 
         input[type="text"], input[type="number"] { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
+        .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; transition: 0.3s; }
         .avatar-option.selected { border-color: var(--accent); background: #fff0f1; transform: scale(1.1); }
 
-        .lvl-btn { padding: 12px 15px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
+        .lvl-btn { padding: 12px 15px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
         
         .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 10px; font-size: 1rem; }
         
         .power-display { font-size: 4.5rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
         .power-display sup { color: var(--accent); }
 
-        #ans { font-size: 3rem; height: 80px; }
+        #ans { font-size: 3rem; height: 80px; transition: none; }
 
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 25px; z-index: 2000; width: 90%; max-width: 400px; box-shadow: 0 0 100px #000; }
         .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
@@ -60,7 +62,10 @@
             <button class="btn-main" onclick="document.getElementById('ranking-box').style.display='none'" style="background:#888">VOLTAR</button>
         </div>
 
-        <button id="voice-toggle" class="voice-toggle" onclick="toggleVoice()">🔊 VOZ: LIGADA</button>
+        <div class="accessibility-bar">
+            <button id="voice-toggle" class="voice-toggle" onclick="toggleVoice()">🔊 VOZ: LIGADA</button>
+            <button class="voice-toggle" style="background:#3498db; color:white" onclick="alert('Use o teclado numérico para atacar!')">ℹ️ AJUDA</button>
+        </div>
 
         <strong style="color:var(--accent)">👨‍🏫 Hilário Schwanz</strong>
         <h2 style="margin: 10px 0;">⚔️ BATALHA DAS POTÊNCIAS</h2>
@@ -116,7 +121,16 @@
 
     <script>
         let avatarSel = "⚔️", curLvl = 0, slideIdx = 0, ativo = false, vida = 100, acertos = 0, tentativas = 0, res, crono, tempo;
-        const conf = [{t:12,d:20,bm:5,em:2},{t:10,d:25,bm:10,em:2},{t:10,d:25,bm:5,em:3},{t:8,d:34,bm:12,em:2},{t:8,d:34,bm:10,em:3}];
+        let lastB, lastE; // Variáveis para evitar repetição
+
+        // Configurações de dificuldade ajustadas (Bases e Expoentes maiores)
+        const conf = [
+            {t:12, d:20, bases:[2,3,4,5,10], expos:[0,1,2,3]}, // Nível 1
+            {t:10, d:25, bases:[2,3,4,5,6,10], expos:[2,3]},   // Nível 2
+            {t:10, d:25, bases:[7,8,9,11,12], expos:[2]},      // Nível 3
+            {t:8,  d:34, bases:[2,3,4,5], expos:[4,5]},        // Nível 4
+            {t:8,  d:34, bases:[13,14,15,20,25], expos:[2]}    // Nível 5
+        ];
 
         function renderBanners() {
             const area = document.getElementById('banner-area');
@@ -156,9 +170,9 @@
 
         function selecionarNivel(l) {
             const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return alert("Digite seu nome!");
+            if(!n) return alert("Digite seu nome primeiro!");
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
-            if(l > p) return alert("Vença o nível anterior!");
+            if(l > p) return alert("Desbloqueie este nível vencendo o anterior!");
             curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
             document.getElementById('btn-'+l).style.background = "#eee"; 
             falar("Nível " + (l+1));
@@ -166,7 +180,7 @@
 
         function tentarIniciar() {
             const n = document.getElementById('nome-aluno').value;
-            if(!n || n.length < 3) return alert("Nome inválido!");
+            if(!n || n.length < 3) return alert("Digite seu nome (mínimo 3 letras)");
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -178,8 +192,14 @@
             if(!ativo) return;
             clearInterval(crono);
             
-            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
-            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
+            let b, e;
+            // Loop para garantir que não repete a mesma conta seguida
+            do {
+                b = conf[curLvl].bases[Math.floor(Math.random() * conf[curLvl].bases.length)];
+                e = conf[curLvl].expos[Math.floor(Math.random() * conf[curLvl].expos.length)];
+            } while (b === lastB && e === lastE);
+            
+            lastB = b; lastE = e;
             res = Math.pow(b, e);
             
             document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
@@ -187,7 +207,6 @@
             input.value = ""; 
             input.focus(); 
 
-            // Fala assíncrona
             setTimeout(() => falar(`${b} elevado a ${e}`), 10);
             
             tempo = conf[curLvl].t;
@@ -200,6 +219,7 @@
                     clearInterval(crono);
                     vida -= conf[curLvl].d;
                     atualizarVida();
+                    mostrarVisual('erro');
                     if(vida <= 0) finalizar(); else rodar();
                 }
             }, 1000);
@@ -217,7 +237,6 @@
             if(v === res) { 
                 acertos++; 
                 mostrarVisual('acerto');
-                // Dispara o confete mas NÃO espera ele acabar para rodar a lógica
                 confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 } }); 
             } else { 
                 vida -= conf[curLvl].d; 
@@ -226,7 +245,6 @@
 
             atualizarVida();
             
-            // Lógica de avanço imediata
             if(vida <= 0 || tentativas >= 15) {
                 setTimeout(finalizar, 50);
             } else {
@@ -234,7 +252,13 @@
             }
         }
 
-        function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
+        function atualizarVida() { 
+            const bar = document.getElementById('life-bar');
+            bar.style.width = Math.max(0, vida) + "%";
+            if(vida < 30) bar.style.background = "var(--danger)";
+            else if(vida < 60) bar.style.background = "var(--gold)";
+            else bar.style.background = "var(--success)";
+        }
 
         function finalizar() {
             ativo = false; clearInterval(crono);
@@ -248,13 +272,17 @@
             if(vida > 0) {
                 const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
+                falar("Parabéns, você venceu!");
+            } else {
+                falar("Não foi dessa vez, tente de novo!");
             }
-            alert(`Fim! Eficiência: ${ef}%`); location.reload();
+            alert(`Fim de jogo!\nAcertos: ${acertos}\nEficiência: ${ef}%`); 
+            location.reload();
         }
 
         function verRanking() {
             const r = JSON.parse(localStorage.getItem('p_rank')) || [];
-            document.getElementById('ranking-list').innerHTML = r.map((i, idx) => `<div class="rank-item"><span>${idx+1}º ${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes!";
+            document.getElementById('ranking-list').innerHTML = r.map((i, idx) => `<div class="rank-item"><span>${idx+1}º ${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Ainda não há recordes!";
             document.getElementById('ranking-box').style.display='block';
         }
 
