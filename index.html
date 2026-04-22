@@ -27,7 +27,7 @@
         .power-display { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; padding: 10px; }
 
-        /* PAINEL ADMIN COM FUNÇÃO DE ESCOLHA REAL */
+        /* PAINEL ADMIN */
         #admin-panel { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; 
@@ -35,7 +35,7 @@
         }
         .admin-label { display: block; font-size: 14px; color: #444; margin-bottom: 8px; font-weight: bold; }
         
-        /* ESTA É A CAIXA QUE AO CLICAR ABRE AS OPÇÕES */
+        /* CAIXA DE SELEÇÃO DE SLOTS (SELECT) - ONDE ESTAVA A SETA VERMELHA */
         .admin-select {
             width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid var(--accent); 
             border-radius: 12px; font-size: 16px; background: #f9f9f9; color: var(--primary);
@@ -43,6 +43,14 @@
         }
 
         .admin-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 15px; }
+        
+        /* MURAL EXTERNO (A PARTE DE BAIXO QUE HAVIA SUMIDO) */
+        .extra-content { width: 100%; max-width: 800px; margin-top: 50px; text-align: center; }
+        .mural-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .testi-card { background: #16213e; padding: 20px; border-radius: 20px; border-left: 5px solid var(--gold); text-align: left; }
+        .testi-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; display: block; }
+        .testi-text { font-size: 0.9rem; color: #eee; font-style: italic; }
+
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
     </style>
 </head>
@@ -55,15 +63,23 @@
         <h2>⚔️ BATALHA DAS POTÊNCIAS</h2>
         <input type="text" id="nome-aluno" placeholder="Digite seu nome" style="width:100%; padding:15px; border-radius:15px; border:2px solid #ddd; text-align: center;">
         <div id="lvls" style="margin-top:20px">
-            <div class="lvl-btn" onclick="selecionarNivel(0)">Nível 1 🔓</div>
+            <div class="lvl-btn">Nível 1 🔓</div>
         </div>
         <button class="btn-main" onclick="tentarIniciar()">INICIAR JOGO</button>
     </div>
 
-    <div id="game-screen" class="card" style="display:none;">
-        <div id="q-box" class="power-display">?<sup>?</sup></div>
-        <input type="number" id="ans" inputmode="numeric">
-        <button class="btn-main" onclick="check()">ATACAR</button>
+    <div class="extra-content">
+        <h3 style="color: var(--gold); text-transform: uppercase;">Mural de Campeões</h3>
+        <div class="mural-grid">
+            <div class="testi-card">
+                <span class="testi-name">Aviso do Professor</span>
+                <p class="testi-text">Domine as potências para desbloquear novos níveis!</p>
+            </div>
+            <div class="testi-card">
+                <span class="testi-name">BEER FOOD TRUCK</span>
+                <p class="testi-text">O melhor lanche da região para recarregar as energias!</p>
+            </div>
+        </div>
     </div>
 
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
@@ -73,43 +89,39 @@
         
         <label class="admin-label">Selecione o Slot para Editar:</label>
         <select id="ad-slot" class="admin-select" onchange="carregarCamposAdmin()">
-            <option value="1">Slot 1</option>
+            <option value="1">Slot 1 - Principal</option>
             <option value="2">Slot 2</option>
             <option value="3">Slot 3</option>
             <option value="4">Slot 4</option>
             <option value="5">Slot 5</option>
         </select>
 
-        <label class="admin-label">Nome do Negócio (Slot Selecionado):</label>
-        <input type="text" id="ad-title" class="admin-input">
+        <label class="admin-label">Título / Nome do Negócio:</label>
+        <input type="text" id="ad-title" placeholder="Ex: BEER FOOD TRUK" class="admin-input">
         
-        <label class="admin-label">Descrição:</label>
-        <input type="text" id="ad-desc" class="admin-input">
+        <label class="admin-label">Descrição / Chamada:</label>
+        <input type="text" id="ad-desc" placeholder="Texto do anúncio..." class="admin-input">
         
         <label class="admin-label">URL da Imagem:</label>
-        <input type="text" id="ad-img" class="admin-input">
+        <input type="text" id="ad-img" placeholder="https://..." class="admin-input">
         
-        <label class="admin-label">Link:</label>
-        <input type="text" id="ad-link" class="admin-input">
+        <label class="admin-label">Link de Destino:</label>
+        <input type="text" id="ad-link" placeholder="WhatsApp ou Instagram" class="admin-input">
         
-        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR NESTE SLOT</button>
+        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR ALTERAÇÕES</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
 
     <script>
-        let curLvl = 0, res, ativo = false, vida = 100, slideIdx = 0;
+        let slideIdx = 0;
 
-        // Função que carrega os dados nos campos toda vez que você muda o slot na caixa
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
-            // Busca no banco de dados local o que tem salvo para o número escolhido
-            const dadosSalvos = JSON.parse(localStorage.getItem('pot_ad_' + slot)) || { title: "", desc: "", url: "", link: "" };
-            
-            // Preenche as caixas de texto com o que foi encontrado
-            document.getElementById('ad-title').value = dadosSalvos.title;
-            document.getElementById('ad-desc').value = dadosSalvos.desc;
-            document.getElementById('ad-img').value = dadosSalvos.url;
-            document.getElementById('ad-link').value = dadosSalvos.link;
+            const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
+            document.getElementById('ad-title').value = d.title;
+            document.getElementById('ad-desc').value = d.desc;
+            document.getElementById('ad-img').value = d.url;
+            document.getElementById('ad-link').value = d.link;
         }
 
         function salvarGeral() {
@@ -120,57 +132,33 @@
                 url: document.getElementById('ad-img').value, 
                 link: document.getElementById('ad-link').value 
             };
-            localStorage.setItem('pot_ad_' + slot, JSON.stringify(obj));
-            alert("Informações salvas no Slot " + slot);
-            location.reload(); // Recarrega para aplicar os banners novos
+            localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj));
+            alert("Salvo com sucesso!");
+            location.reload();
         }
 
         function abrirAdmin() { 
             if(prompt("Senha:") === "Food2024@") {
                 document.getElementById('admin-panel').style.display='block';
-                carregarCamposAdmin(); // Carrega o Slot 1 por padrão ao abrir
+                carregarCamposAdmin();
             }
         }
 
         function renderBanners() {
             const area = document.getElementById('banner-area');
-            let htmlTotal = ''; let count = 0;
+            let h = ''; let c = 0;
             for(let i=1; i<=5; i++) {
-                const d = JSON.parse(localStorage.getItem('pot_ad_' + i));
+                const d = JSON.parse(localStorage.getItem('pot_ad_'+i));
                 if(d && d.title) {
-                    htmlTotal += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
-                    count++;
+                    h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
+                    c++;
                 }
             }
-            if(count === 0) {
-                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">SEM ANÚNCIOS ATIVOS</p></div>';
-            } else {
-                area.innerHTML = htmlTotal;
-                const slides = area.querySelectorAll('.slide');
-                slides[0].classList.add('active');
-                if(count > 1) {
-                    setInterval(() => {
-                        slides[slideIdx].classList.remove('active');
-                        slideIdx = (slideIdx + 1) % slides.length;
-                        slides[slideIdx].classList.add('active');
-                    }, 5000);
-                }
+            if(c === 0) { area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANÚNCIOS AQUI</p></div>'; }
+            else {
+                area.innerHTML = h; const slides = area.querySelectorAll('.slide'); slides[0].classList.add('active');
+                if(c > 1) setInterval(() => { slides[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % slides.length; slides[slideIdx].classList.add('active'); }, 5000);
             }
-        }
-
-        // Lógica simples do jogo para não dar erro
-        function tentarIniciar() {
-            document.getElementById('setup-screen').style.display='none';
-            document.getElementById('game-screen').style.display='block';
-            ativo=true; rodar();
-        }
-        function rodar() {
-            let b = 2, e = 3; res = 8;
-            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
-        }
-        function check() {
-            if(parseInt(document.getElementById('ans').value) === res) alert("Correto!");
-            rodar();
         }
 
         window.onload = renderBanners;
