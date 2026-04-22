@@ -45,8 +45,11 @@
         /* OVERLAYS */
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; color: #333; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: 600; }
+        
+        /* PAINEL ADMIN CORRIGIDO */
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 25px; z-index: 2000; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
-        .admin-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; }
+        .admin-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; }
+        label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; font-weight: bold; }
 
         footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
     </style>
@@ -116,7 +119,9 @@
     <footer onclick="abrirAdmin()">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
-        <h3>Configurar Banners (5 Slots)</h3>
+        <h3 style="margin-top:0">Configurar Banners</h3>
+        
+        <label>Selecione o Slot para Editar:</label>
         <select id="ad-slot" class="admin-input" onchange="carregarCamposAdmin()">
             <option value="1">Patrocinador 1</option>
             <option value="2">Patrocinador 2</option>
@@ -124,11 +129,20 @@
             <option value="4">Patrocinador 4</option>
             <option value="5">Patrocinador 5</option>
         </select>
-        <input type="text" id="ad-title" placeholder="Nome do Negócio" class="admin-input">
-        <input type="text" id="ad-desc" placeholder="Promoção/Descrição" class="admin-input">
-        <input type="text" id="ad-img" placeholder="URL da Imagem (Link)" class="admin-input">
-        <input type="text" id="ad-link" placeholder="Link do WhatsApp/Insta" class="admin-input">
-        <button class="btn-main" onclick="salvarGeral()">SALVAR NESTE SLOT</button>
+
+        <label>Título / Nome do Negócio:</label>
+        <input type="text" id="ad-title" placeholder="Ex: Beer Food Truck" class="admin-input">
+        
+        <label>Descrição / Chamada:</label>
+        <input type="text" id="ad-desc" placeholder="Ex: O melhor hambúrguer!" class="admin-input">
+        
+        <label>Link da Imagem (Logo/Banner):</label>
+        <input type="text" id="ad-img" placeholder="https://link-da-foto.jpg" class="admin-input">
+        
+        <label>Link de Destino (Insta/Whats):</label>
+        <input type="text" id="ad-link" placeholder="https://instagram.com/..." class="admin-input">
+        
+        <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR ALTERAÇÕES</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
 
@@ -142,25 +156,24 @@
             {t: 8, d: 34, bm: 10, em: 3}
         ];
 
-        // RENDERIZAÇÃO DOS 5 BANNERS
         function renderBanners() {
             const area = document.getElementById('banner-area');
             let h = '';
-            let bannersEncontrados = 0;
+            let bannersCount = 0;
             for(let i=1; i<=5; i++) {
                 const d = JSON.parse(localStorage.getItem('pot_ad_'+i));
-                if(d && d.title && d.title !== "Vazio") {
+                if(d && d.title) {
                     h += `<div class="slide" onclick="window.open('${d.link}', '_blank')"><img src="${d.url}"><div class="slide-info"><p class="slide-title">${d.title}</p><p class="slide-text">${d.desc}</p></div></div>`;
-                    bannersEncontrados++;
+                    bannersCount++;
                 }
             }
-            if(bannersEncontrados === 0) {
-                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANUNCIE AQUI - ESPAÇO DISPONÍVEL</p></div>';
+            if(bannersCount === 0) {
+                area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ESPAÇO PARA PATROCINADOR DISPONÍVEL</p></div>';
             } else {
                 area.innerHTML = h;
                 const slides = area.querySelectorAll('.slide');
                 slides[0].classList.add('active');
-                if(bannersEncontrados > 1) {
+                if(bannersCount > 1) {
                     setInterval(() => {
                         slides[slideIdx].classList.remove('active');
                         slideIdx = (slideIdx + 1) % slides.length;
@@ -171,13 +184,12 @@
         }
 
         function abrirAdmin() { 
-            if(prompt("Senha Admin:") === "Food2024@") {
+            if(prompt("Senha:") === "Food2024@") {
                 document.getElementById('admin-panel').style.display='block';
-                carregarCamposAdmin(); // Carrega o slot 1 por padrão
+                carregarCamposAdmin();
             }
         }
 
-        // FUNÇÃO CORRIGIDA PARA CARREGAR OS DADOS DO SLOT SELECIONADO
         function carregarCamposAdmin() {
             const slot = document.getElementById('ad-slot').value;
             const d = JSON.parse(localStorage.getItem('pot_ad_'+slot)) || { title: "", desc: "", url: "", link: "" };
@@ -196,7 +208,7 @@
                 link: document.getElementById('ad-link').value 
             };
             localStorage.setItem('pot_ad_'+slot, JSON.stringify(obj));
-            alert("Slot " + slot + " atualizado!");
+            alert("Sucesso! Slot " + slot + " atualizado.");
             location.reload();
         }
 
@@ -211,16 +223,16 @@
 
         function selecionarNivel(l) {
             const n = document.getElementById('nome-aluno').value.trim();
-            if(!n) return alert("Digite o nome primeiro!");
+            if(!n) return alert("Digite seu nome!");
             const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            if(l > p) return alert("Bloqueado! Complete o nível anterior.");
+            if(l > p) return alert("Nível Bloqueado!");
             curLvl = l;
             document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
             document.getElementById('btn-'+l).style.background = "#eee";
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return alert("Digite seu nome completo.");
+            if(document.getElementById('nome-aluno').value.length < 3) return;
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -265,12 +277,12 @@
                 const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('pot_prog_'+n, curLvl + 1);
             }
-            alert(`Fim! Sua eficácia foi de ${ef}%`); location.reload();
+            alert(`Fim! Eficácia: ${ef}%`); location.reload();
         }
 
         function verRanking() {
             const r = JSON.parse(localStorage.getItem('pot_rank')) || [];
-            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Aguardando recordes...";
+            document.getElementById('ranking-list').innerHTML = r.map(i => `<div class="rank-item"><span>${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes";
             document.getElementById('ranking-box').style.display='block';
         }
 
