@@ -44,7 +44,7 @@
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 25px; z-index: 2000; width: 90%; max-width: 400px; box-shadow: 0 0 100px #000; }
         .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
         
-        .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; z-index: 9999; transition: 0.2s; }
+        .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; z-index: 9999; }
         .visual-indicator.show { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
@@ -165,7 +165,8 @@
         }
 
         function tentarIniciar() {
-            if(document.getElementById('nome-aluno').value.length < 3) return alert("Nome inválido!");
+            const n = document.getElementById('nome-aluno').value;
+            if(!n || n.length < 3) return alert("Nome inválido!");
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
@@ -186,7 +187,7 @@
             input.value = ""; 
             input.focus(); 
 
-            // FALA ASSÍNCRONA - NÃO TRAVA O JOGO
+            // Fala assíncrona
             setTimeout(() => falar(`${b} elevado a ${e}`), 10);
             
             tempo = conf[curLvl].t;
@@ -215,8 +216,9 @@
 
             if(v === res) { 
                 acertos++; 
-                mostrarVisual('acerto'); 
-                canvasConfetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); 
+                mostrarVisual('acerto');
+                // Dispara o confete mas NÃO espera ele acabar para rodar a lógica
+                confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 } }); 
             } else { 
                 vida -= conf[curLvl].d; 
                 mostrarVisual('erro'); 
@@ -224,8 +226,9 @@
 
             atualizarVida();
             
+            // Lógica de avanço imediata
             if(vida <= 0 || tentativas >= 15) {
-                finalizar();
+                setTimeout(finalizar, 50);
             } else {
                 rodar(); 
             }
@@ -241,6 +244,7 @@
             r.push({nome: n, avatar: avatarSel, efic: ef, lvl: (curLvl+1)});
             r.sort((a,b) => b.efic - a.efic);
             localStorage.setItem('p_rank', JSON.stringify(r.slice(0,10)));
+            
             if(vida > 0) {
                 const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
@@ -259,10 +263,10 @@
         let voiceEnabled = true;
         function falar(t) { 
             if(voiceEnabled && window.speechSynthesis) { 
-                window.speechSynthesis.cancel(); // Para qualquer fala anterior NA HORA
+                window.speechSynthesis.cancel();
                 const u = new SpeechSynthesisUtterance(t); 
                 u.lang='pt-BR'; 
-                u.rate = 1.2; // Fala um pouco mais rápido para não atrasar
+                u.rate = 1.2;
                 window.speechSynthesis.speak(u); 
             } 
         }
