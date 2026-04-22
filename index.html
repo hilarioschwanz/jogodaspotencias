@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha das Potências - Pro</title>
+    <title>Batalha das Potências - Ultra Speed</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
             --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
-            --danger: #e74c3c;
         }
-        * { box-sizing: border-box; transition: 0.3s; }
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 120px; cursor: pointer; }
-        .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; visibility: hidden; }
+        .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; visibility: hidden; transition: 0.5s; }
         .slide.active { opacity: 1; visibility: visible; }
         .slide img { height: 80px; width: 80px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 2px solid var(--gold); }
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; }
@@ -26,10 +25,9 @@
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #333; font-weight: bold; }
 
-        .accessibility-bar { background: #2c3e50; padding: 12px; border-radius: 15px; margin-bottom: 20px; }
-        .voice-toggle { background: var(--gold); border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .voice-toggle { background: var(--gold); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; }
 
-        input[type="text"] { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-size: 1rem; margin-bottom: 15px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
         .avatar-option.selected { border-color: var(--accent); background: #fff0f1; transform: scale(1.1); }
@@ -41,12 +39,12 @@
         .power-display { font-size: 4.5rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
         .power-display sup { color: var(--accent); }
 
-        #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; }
+        #ans { font-size: 3rem; height: 80px; }
 
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 25px; z-index: 2000; width: 90%; max-width: 400px; box-shadow: 0 0 100px #000; }
         .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
         
-        .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; z-index: 9999; }
+        .visual-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; opacity: 0; pointer-events: none; z-index: 9999; transition: 0.2s; }
         .visual-indicator.show { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
@@ -62,9 +60,7 @@
             <button class="btn-main" onclick="document.getElementById('ranking-box').style.display='none'" style="background:#888">VOLTAR</button>
         </div>
 
-        <div class="accessibility-bar">
-            <button id="voice-toggle" class="voice-toggle" onclick="toggleVoice()">🔊 VOZ: LIGADA</button>
-        </div>
+        <button id="voice-toggle" class="voice-toggle" onclick="toggleVoice()">🔊 VOZ: LIGADA</button>
 
         <strong style="color:var(--accent)">👨‍🏫 Hilário Schwanz</strong>
         <h2 style="margin: 10px 0;">⚔️ BATALHA DAS POTÊNCIAS</h2>
@@ -103,7 +99,7 @@
         <button class="btn-main" onclick="check()">ATACAR!</button>
     </div>
 
-    <footer onclick="abrirAdmin()" style="margin-top:20px; color:#555; cursor:pointer">© 2026 Hilário Schwanz | Painel Admin</footer>
+    <footer onclick="abrirAdmin()" style="margin-top:20px; color:#555; cursor:pointer; font-size: 0.8rem;">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
         <h3>📢 Configurar Banner</h3>
@@ -164,7 +160,8 @@
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
             if(l > p) return alert("Vença o nível anterior!");
             curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
-            document.getElementById('btn-'+l).style.background = "#eee"; falar("Nível " + (l+1));
+            document.getElementById('btn-'+l).style.background = "#eee"; 
+            falar("Nível " + (l+1));
         }
 
         function tentarIniciar() {
@@ -185,9 +182,12 @@
             res = Math.pow(b, e);
             
             document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
-            document.getElementById('ans').value = ""; 
-            document.getElementById('ans').focus();
-            falar(`${b} elevado a ${e}`);
+            const input = document.getElementById('ans');
+            input.value = ""; 
+            input.focus(); 
+
+            // FALA ASSÍNCRONA - NÃO TRAVA O JOGO
+            setTimeout(() => falar(`${b} elevado a ${e}`), 10);
             
             tempo = conf[curLvl].t;
             document.getElementById('time-txt').innerText = tempo+"s";
@@ -207,33 +207,28 @@
         function check() {
             if(!ativo) return;
             const input = document.getElementById('ans');
-            let v = parseInt(input.value);
-            if(isNaN(v)) return;
+            if(input.value === "") return;
             
+            let v = parseInt(input.value);
             clearInterval(crono); 
             tentativas++;
 
             if(v === res) { 
                 acertos++; 
-                falar("Certo!"); 
                 mostrarVisual('acerto'); 
-                canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+                canvasConfetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); 
             } else { 
                 vida -= conf[curLvl].d; 
-                falar("Errado!"); 
                 mostrarVisual('erro'); 
             }
 
             atualizarVida();
             
-            // PEQUENO TIMEOUT PARA GARANTIR QUE O NAVEGADOR PROCESSE A PRÓXIMA QUESTÃO
-            setTimeout(() => {
-                if(vida <= 0 || tentativas >= 15) {
-                    finalizar();
-                } else {
-                    rodar(); 
-                }
-            }, 50);
+            if(vida <= 0 || tentativas >= 15) {
+                finalizar();
+            } else {
+                rodar(); 
+            }
         }
 
         function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
@@ -250,7 +245,7 @@
                 const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
                 if(curLvl >= p) localStorage.setItem('p_prog_'+n, curLvl + 1);
             }
-            alert(`Fim de jogo! Eficiência: ${ef}%`); location.reload();
+            alert(`Fim! Eficiência: ${ef}%`); location.reload();
         }
 
         function verRanking() {
@@ -262,17 +257,32 @@
         function selAvatar(el, icon) { document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); avatarSel = icon; }
         
         let voiceEnabled = true;
-        function falar(t) { if(voiceEnabled) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='pt-BR'; window.speechSynthesis.speak(u); } }
+        function falar(t) { 
+            if(voiceEnabled && window.speechSynthesis) { 
+                window.speechSynthesis.cancel(); // Para qualquer fala anterior NA HORA
+                const u = new SpeechSynthesisUtterance(t); 
+                u.lang='pt-BR'; 
+                u.rate = 1.2; // Fala um pouco mais rápido para não atrasar
+                window.speechSynthesis.speak(u); 
+            } 
+        }
         function toggleVoice() { voiceEnabled = !voiceEnabled; document.getElementById('voice-toggle').innerText = voiceEnabled ? "🔊 VOZ: LIGADA" : "🔇 VOZ: DESLIGADA"; }
+        
         function mostrarVisual(tipo) {
             const ind = document.getElementById('visualIndicator');
             ind.innerHTML = tipo === 'acerto' ? '✅' : '❌';
             ind.style.color = tipo === 'acerto' ? '#27ae60' : '#e74c3c';
-            ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
+            ind.classList.add('show'); 
+            setTimeout(() => ind.classList.remove('show'), 300);
         }
 
         window.onload = renderBanners;
-        document.addEventListener("keydown", (e) => { if(e.key === "Enter" && ativo) check(); });
+        document.addEventListener("keydown", (e) => { 
+            if(e.key === "Enter" && ativo) {
+                e.preventDefault();
+                check();
+            }
+        });
     </script>
 </body>
 </html>
