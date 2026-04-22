@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha das Potências - Oficial</title>
+    <title>Batalha das Potências - Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
@@ -14,7 +14,6 @@
         * { box-sizing: border-box; transition: 0.3s; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
 
-        /* BANNERS */
         .banner-wrapper { width: 100%; max-width: 800px; margin-bottom: 25px; background: #16213e; border-radius: 20px; border: 2px solid #444; overflow: hidden; position: relative; height: 120px; cursor: pointer; }
         .slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px 20px; opacity: 0; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; }
@@ -22,28 +21,23 @@
         .slide-title { color: var(--gold); font-weight: 800; margin: 0; font-size: 1.1rem; }
         .slide-text { color: #ccc; font-size: 0.85rem; margin: 4px 0; }
 
-        /* CARD PRINCIPAL */
         .card { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; width: 100%; max-width: 500px; }
         
-        /* RANKING (POR CIMA) */
         #ranking-box { display: none; position: absolute; inset: 0; background: white; z-index: 100; border-radius: 30px; padding: 25px; overflow-y: auto; }
         .rank-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #333; font-weight: bold; }
 
-        /* ACESSIBILIDADE */
         .accessibility-bar { background: #2c3e50; padding: 12px; border-radius: 15px; margin-bottom: 20px; }
         .voice-toggle { background: var(--gold); border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; }
         .high-contrast { background: #000 !important; }
         .high-contrast .card { background: #111; color: #fff; border: 2px solid #fff; }
 
-        /* INPUTS E BOTOES */
         input[type="text"] { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-size: 1rem; margin-bottom: 15px; }
         .avatar-grid { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .avatar-option { font-size: 1.8rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid #eee; background: #f9f9f9; }
         .avatar-option.selected { border-color: var(--accent); background: #fff0f1; transform: scale(1.1); }
 
         .lvl-btn { padding: 12px 15px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 8px; cursor: pointer; color: #333; font-weight: 700; background: white; display: flex; justify-content: space-between; align-items: center; }
-        .lvl-btn:hover { border-color: var(--accent); }
-
+        
         .btn-main { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 800; text-transform: uppercase; margin-top: 10px; font-size: 1rem; }
         
         .power-display { font-size: 4.5rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
@@ -51,7 +45,6 @@
 
         #ans { width: 100%; max-width: 200px; font-size: 2.5rem; text-align: center; border-radius: 15px; border: 3px solid #eee; }
 
-        /* ADMIN */
         #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 25px; z-index: 2000; width: 90%; max-width: 400px; box-shadow: 0 0 100px #000; }
         .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
         
@@ -113,7 +106,7 @@
         <button class="btn-main" onclick="check()">ATACAR!</button>
     </div>
 
-    <footer onclick="abrirAdmin()" style="margin-top:20px; color:#555; cursor:pointer">© 2026 Hilário Schwanz | Configurar Anúncios</footer>
+    <footer onclick="abrirAdmin()" style="margin-top:20px; color:#555; cursor:pointer">© 2026 Hilário Schwanz | Painel Admin</footer>
 
     <div id="admin-panel">
         <h3>📢 Configurar Banner</h3>
@@ -125,7 +118,7 @@
         <input type="text" id="ad-title" placeholder="Título" class="admin-input">
         <input type="text" id="ad-desc" placeholder="Descrição" class="admin-input">
         <input type="text" id="ad-img" placeholder="URL da Imagem" class="admin-input">
-        <input type="text" id="ad-link" placeholder="Link (Insta/Whats)" class="admin-input">
+        <input type="text" id="ad-link" placeholder="Link Destino" class="admin-input">
         <button class="btn-main" onclick="salvarGeral()" style="background:var(--success)">SALVAR</button>
         <button class="btn-main" style="background:#888" onclick="document.getElementById('admin-panel').style.display='none'">FECHAR</button>
     </div>
@@ -144,16 +137,10 @@
                     count++;
                 }
             }
-            if(count === 0) area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANUNCIE SEU NEGÓCIO AQUI</p></div>';
+            if(count === 0) area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">ANUNCIE AQUI</p></div>';
             else {
-                area.innerHTML = h;
-                const s = area.querySelectorAll('.slide');
-                s[0].classList.add('active');
-                if(count > 1) setInterval(() => {
-                    s[slideIdx].classList.remove('active');
-                    slideIdx = (slideIdx + 1) % s.length;
-                    s[slideIdx].classList.add('active');
-                }, 4000);
+                area.innerHTML = h; const s = area.querySelectorAll('.slide'); s[0].classList.add('active');
+                if(count > 1) setInterval(() => { s[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % s.length; s[slideIdx].classList.add('active'); }, 4000);
             }
         }
 
@@ -173,10 +160,7 @@
         function validarProgresso() {
             const n = document.getElementById('nome-aluno').value.trim();
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
-            for(let i=1; i<=4; i++) {
-                const el = document.getElementById('l'+i);
-                if(el) el.innerText = p >= i ? "🔓" : "🔒";
-            }
+            for(let i=1; i<=4; i++) { const el = document.getElementById('l'+i); if(el) el.innerText = p >= i ? "🔓" : "🔒"; }
         }
 
         function selecionarNivel(l) {
@@ -184,10 +168,8 @@
             if(!n) return alert("Digite seu nome!");
             const p = parseInt(localStorage.getItem('p_prog_'+n)) || 0;
             if(l > p) return alert("Vença o nível anterior!");
-            curLvl = l;
-            document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
-            document.getElementById('btn-'+l).style.background = "#eee";
-            falar("Nível " + (l+1));
+            curLvl = l; document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
+            document.getElementById('btn-'+l).style.background = "#eee"; falar("Nível " + (l+1));
         }
 
         function tentarIniciar() {
@@ -195,7 +177,7 @@
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('player-tag').innerText = avatarSel;
-            vida=100; acertos=0; tentativas=0; ativo=true;
+            vida=100; acertos=0; tentativas=0; ativo=true; atualizarVida();
             rodar();
         }
 
@@ -212,18 +194,37 @@
             document.getElementById('time-txt').innerText = tempo+"s";
             crono = setInterval(() => {
                 tempo--; document.getElementById('time-txt').innerText = tempo+"s";
-                if(tempo <= 0) { vida -= conf[curLvl].d; atualizarVida(); if(vida <= 0) finalizar(); else rodar(); }
+                if(tempo <= 0) { 
+                    vida -= conf[curLvl].d; atualizarVida(); 
+                    if(vida <= 0) finalizar(); else rodar(); 
+                }
             }, 1000);
         }
 
         function check() {
+            if(!ativo) return;
             let v = parseInt(document.getElementById('ans').value);
             if(isNaN(v)) return;
+            
+            // PARA O TEMPO IMEDIATAMENTE AO RESPONDER
+            clearInterval(crono);
             tentativas++;
-            if(v === res) { acertos++; falar("Certo!"); mostrarVisual('acerto'); canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
-            else { vida -= conf[curLvl].d; falar("Errado!"); mostrarVisual('erro'); }
+
+            if(v === res) { 
+                acertos++; falar("Certo!"); mostrarVisual('acerto'); 
+                canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+            } else { 
+                vida -= conf[curLvl].d; falar("Errado!"); mostrarVisual('erro'); 
+            }
+
             atualizarVida();
-            if(vida <= 0 || tentativas >= 15) finalizar(); else rodar();
+            
+            // VAI PARA A PRÓXIMA SEM ESPERAR
+            if(vida <= 0 || tentativas >= 15) {
+                finalizar();
+            } else {
+                rodar(); 
+            }
         }
 
         function atualizarVida() { document.getElementById('life-bar').style.width = Math.max(0, vida) + "%"; }
@@ -245,7 +246,7 @@
 
         function verRanking() {
             const r = JSON.parse(localStorage.getItem('p_rank')) || [];
-            document.getElementById('ranking-list').innerHTML = r.map((i, idx) => `<div class="rank-item"><span>${idx+1}º ${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Ainda não há recordes!";
+            document.getElementById('ranking-list').innerHTML = r.map((i, idx) => `<div class="rank-item"><span>${idx+1}º ${i.avatar} ${i.nome}</span><span>${i.efic}% (Niv ${i.lvl})</span></div>`).join('') || "Sem recordes!";
             document.getElementById('ranking-box').style.display='block';
         }
 
@@ -259,7 +260,7 @@
             const ind = document.getElementById('visualIndicator');
             ind.innerHTML = tipo === 'acerto' ? '✅' : '❌';
             ind.style.color = tipo === 'acerto' ? '#27ae60' : '#e74c3c';
-            ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 500);
+            ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
         }
 
         window.onload = renderBanners;
