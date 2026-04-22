@@ -9,7 +9,6 @@
         :root { 
             --primary: #0f3460; --accent: #e94560; --gold: #f1c40f; --success: #27ae60; 
             --danger: #e74c3c; --dark: #1a1a2e; --card-bg: #ffffff; --text: #1a1a2e; --bg: #1a1a2e;
-            --bronze: #cd7f32; --silver: #c0c0c0;
         }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 10px; }
@@ -51,7 +50,6 @@
         .ranking-position { font-weight: bold; font-size: 18px; width: 50px; }
         .ranking-name { flex: 2; font-weight: 600; }
         .ranking-score { color: var(--accent); font-weight: bold; }
-        .ranking-details { font-size: 12px; color: #666; }
 
         .admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #333; padding: 25px; border-radius: 25px; z-index: 9999; width: 95%; max-width: 450px; box-shadow: 0 0 100px rgba(0,0,0,0.8); border: 2px solid #ccc; max-height: 90vh; overflow-y: auto; }
         .slots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
@@ -59,7 +57,7 @@
         .slot-card.selected { border-color: var(--accent); background: #ffe0e5; }
         .admin-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; }
         
-        footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; transition: color 0.2s; }
+        footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 0.9rem; color: #888; cursor: pointer; }
         footer:hover { color: var(--gold); }
         
         .feedback { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; color: white; font-weight: bold; z-index: 10000; animation: slideIn 0.3s ease; }
@@ -148,19 +146,19 @@
     </div>
 
     <script>
-        // ========== CONFIGURAÇÕES DO JOGO (MANTIDAS DO ORIGINAL) ==========
+        // ========== CONFIGURAÇÕES DO JOGO ==========
         let curLvl = 0, res, ativo = false, vida = 100, acertos = 0, slideIdx = 0;
         let nomeJogador = "", tempoInicio = 0, timerInterval = null;
         let voiceEnabled = true, synthesis = window.speechSynthesis, selectedVoice = null;
         let slotSelecionadoAdmin = 1;
         
-        // Configuração dos níveis IGUAL ao original
+        // Configuração dos níveis - cada nível tem base e expoente maiores
         const conf = [
-            {t:12, d:20, bm:5, em:2},  // Nível 1
-            {t:10, d:25, bm:10, em:2}, // Nível 2
-            {t:10, d:25, bm:5, em:3},  // Nível 3
-            {t:8, d:34, bm:12, em:2},  // Nível 4
-            {t:8, d:34, bm:10, em:3}   // Nível 5
+            {baseMin: 2, baseMax: 4, expMin: 2, expMax: 2, nome: "Nível 1 - Fácil"},     // 2² a 4²
+            {baseMin: 2, baseMax: 5, expMin: 2, expMax: 2, nome: "Nível 2"},              // 2² a 5²
+            {baseMin: 2, baseMax: 5, expMin: 2, expMax: 3, nome: "Nível 3"},              // 2² a 5³
+            {baseMin: 2, baseMax: 8, expMin: 2, expMax: 3, nome: "Nível 4"},              // 2² a 8³
+            {baseMin: 2, baseMax: 10, expMin: 2, expMax: 4, nome: "Nível 5 - Difícil"}    // 2² a 10⁴
         ];
 
         // ========== SISTEMA DE NARRAÇÃO ==========
@@ -229,8 +227,12 @@
             const resultado = calcularPontuacao();
             let ranking = JSON.parse(localStorage.getItem('pot_ranking') || '[]');
             const idx = ranking.findIndex(r => r.nome === nomeJogador);
-            if(idx !== -1) { if(resultado.pontuacao > ranking[idx].pontuacao) ranking[idx] = { nome: nomeJogador, ...resultado, data: new Date().toISOString() }; } 
-            else { ranking.push({ nome: nomeJogador, ...resultado, data: new Date().toISOString() }); }
+            if(idx !== -1) { 
+                if(resultado.pontuacao > ranking[idx].pontuacao) 
+                    ranking[idx] = { nome: nomeJogador, ...resultado, data: new Date().toISOString() }; 
+            } else { 
+                ranking.push({ nome: nomeJogador, ...resultado, data: new Date().toISOString() }); 
+            }
             ranking.sort((a, b) => b.pontuacao - a.pontuacao);
             if(ranking.length > 50) ranking = ranking.slice(0, 50);
             localStorage.setItem('pot_ranking', JSON.stringify(ranking));
@@ -268,19 +270,41 @@
             }
             if(slides.length === 0) { area.innerHTML = '<div class="slide active" style="justify-content:center"><p class="slide-title">📢 ANÚNCIOS AQUI</p></div>'; return; }
             let html = '';
-            slides.forEach(slide => { html += `<div class="slide" onclick="window.open('${slide.link || '#'}')"><img src="${slide.url}" onerror="this.src='https://via.placeholder.com/80'"><div><p class="slide-title">${slide.title}</p><p class="slide-text">${slide.desc || ''}</p></div></div>`; });
+            slides.forEach(slide => { 
+                html += `<div class="slide" onclick="window.open('${slide.link || '#'}')">
+                            <img src="${slide.url}" onerror="this.src='https://via.placeholder.com/80'">
+                            <div><p class="slide-title">${slide.title}</p><p class="slide-text">${slide.desc || ''}</p></div>
+                         </div>`; 
+            });
             area.innerHTML = html;
             const slidesEl = area.querySelectorAll('.slide');
             if(slidesEl.length) {
                 slidesEl[0].classList.add('active');
-                if(slidesEl.length > 1) setInterval(() => { slidesEl[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % slidesEl.length; slidesEl[slideIdx].classList.add('active'); }, 5000);
+                if(slidesEl.length > 1) setInterval(() => { 
+                    slidesEl[slideIdx].classList.remove('active'); 
+                    slideIdx = (slideIdx + 1) % slidesEl.length; 
+                    slidesEl[slideIdx].classList.add('active'); 
+                }, 5000);
             }
         }
         
-        function abrirAdmin() { if(prompt("Senha:") === "Food2024@") { document.getElementById('admin-panel').style.display='block'; atualizarPreviews(); selecionarSlotAdmin(1); } }
+        function abrirAdmin() { 
+            const senha = prompt("Senha do administrador:");
+            if(senha === "Food2024@") { 
+                document.getElementById('admin-panel').style.display='block'; 
+                atualizarPreviews(); 
+                selecionarSlotAdmin(1); 
+            } else if(senha) alert("Senha incorreta!");
+        }
+        
         function fecharAdmin() { document.getElementById('admin-panel').style.display='none'; }
         
-        function atualizarPreviews() { for(let i=1; i<=5; i++) { const d = JSON.parse(localStorage.getItem('pot_ad_'+i) || '{}'); document.getElementById(`preview-${i}`).innerHTML = d.title ? d.title.substring(0,10) : '📺'; } }
+        function atualizarPreviews() { 
+            for(let i=1; i<=5; i++) { 
+                const d = JSON.parse(localStorage.getItem('pot_ad_'+i) || '{}'); 
+                document.getElementById(`preview-${i}`).innerHTML = d.title ? d.title.substring(0,10) : '📺 Vazio';
+            } 
+        }
         
         function selecionarSlotAdmin(slot) {
             slotSelecionadoAdmin = slot;
@@ -294,18 +318,33 @@
         }
         
         function salvarGeral() {
-            const obj = { title: document.getElementById('ad-title').value, desc: document.getElementById('ad-desc').value, url: document.getElementById('ad-img').value, link: document.getElementById('ad-link').value };
+            const obj = { 
+                title: document.getElementById('ad-title').value, 
+                desc: document.getElementById('ad-desc').value, 
+                url: document.getElementById('ad-img').value, 
+                link: document.getElementById('ad-link').value 
+            };
             localStorage.setItem('pot_ad_'+slotSelecionadoAdmin, JSON.stringify(obj));
             alert("Slot " + slotSelecionadoAdmin + " atualizado!");
             renderBanners();
             fecharAdmin();
         }
         
-        // ========== FUNÇÕES DO JOGO (MANTIDAS EXATAMENTE IGUAIS AO ORIGINAL) ==========
+        // ========== FUNÇÕES DO JOGO CORRIGIDAS ==========
         function validarProgresso() {
             const n = document.getElementById('nome-aluno').value.trim();
+            if(!n) return;
             const p = parseInt(localStorage.getItem('pot_prog_'+n)) || 0;
-            for(let i=1; i<=4; i++) { if(document.getElementById('l'+i)) document.getElementById('l'+i).innerText = p >= i ? "🔓" : "🔒"; }
+            for(let i=1; i<=4; i++) { 
+                const el = document.getElementById('l'+i);
+                if(el) el.innerText = p >= i ? "🔓" : "🔒";
+            }
+            // Seleciona o maior nível disponível
+            if(p >= 0 && document.getElementById('btn-'+p)) {
+                curLvl = p;
+                document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white");
+                document.getElementById('btn-'+p).style.background = "#eee";
+            }
         }
 
         function selecionarNivel(l) {
@@ -317,50 +356,93 @@
                 document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = "white"); 
                 document.getElementById('btn-'+l).style.background = "#eee";
                 falar(`Nível ${l+1} selecionado`);
-            } else { alert("Nível Bloqueado!"); }
+            } else { 
+                alert("Nível Bloqueado! Complete os níveis anteriores primeiro.");
+            }
         }
         
         function iniciarTimer() {
             if(timerInterval) clearInterval(timerInterval);
             tempoInicio = Date.now();
-            timerInterval = setInterval(() => { if(ativo) document.getElementById('timer').innerHTML = Math.floor((Date.now() - tempoInicio)/1000) + "s"; }, 1000);
+            timerInterval = setInterval(() => { 
+                if(ativo) document.getElementById('timer').innerHTML = Math.floor((Date.now() - tempoInicio)/1000) + "s"; 
+            }, 1000);
         }
         
-        function pararTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+        function pararTimer() { 
+            if(timerInterval) { 
+                clearInterval(timerInterval); 
+                timerInterval = null; 
+            } 
+        }
         
-        // Função rodar IGUAL ao original
+        // FUNÇÃO RODAR CORRIGIDA - Agora gera desafios diferentes!
         function rodar() {
             if(!ativo) return;
-            let b = Math.floor(Math.random() * (conf[curLvl].bm - 1)) + 2;
-            let e = Math.floor(Math.random() * (conf[curLvl].em - 1)) + 2;
-            res = Math.pow(b, e);
-            document.getElementById('q-box').innerHTML = `${b}<sup>${e}</sup>`;
+            
+            // Pega as configurações do nível atual
+            const nivel = conf[curLvl];
+            
+            // Gera base e expoente dentro dos limites do nível
+            let base = Math.floor(Math.random() * (nivel.baseMax - nivel.baseMin + 1)) + nivel.baseMin;
+            let expoente = Math.floor(Math.random() * (nivel.expMax - nivel.expMin + 1)) + nivel.expMin;
+            
+            // Calcula a potência
+            let resultado = Math.pow(base, expoente);
+            
+            // Evita números extremamente grandes (acima de 10 milhões)
+            while(resultado > 10000000) {
+                base = Math.floor(Math.random() * (nivel.baseMax - nivel.baseMin + 1)) + nivel.baseMin;
+                expoente = Math.floor(Math.random() * (nivel.expMax - nivel.expMin + 1)) + nivel.expMin;
+                resultado = Math.pow(base, expoente);
+            }
+            
+            res = resultado;
+            document.getElementById('q-box').innerHTML = `${base}<sup>${expoente}</sup>`;
             document.getElementById('ans').value = ""; 
             document.getElementById('ans').focus();
-            falar(`Calcule ${b} elevado a ${e}`);
+            
+            // Narra a potência
+            falar(`Calcule ${base} elevado a ${expoente}`);
+            
+            console.log(`Nível ${curLvl+1}: ${base}^${expoente} = ${res}`); // Para debug
         }
         
         function tentarIniciar() {
             const nome = document.getElementById('nome-aluno').value.trim();
-            if(nome.length < 3) return alert("Digite um nome com pelo menos 3 caracteres!");
+            if(nome.length < 2) {
+                alert("Digite um nome com pelo menos 2 caracteres!");
+                return;
+            }
+            
             nomeJogador = nome;
             vida = 100;
             acertos = 0;
             ativo = true;
+            
             document.getElementById('setup-screen').style.display='none';
             document.getElementById('game-screen').style.display='block';
             document.getElementById('nivel-atual').innerHTML = curLvl+1;
             document.getElementById('acertos-count').innerHTML = "0";
             document.getElementById('vida-valor').innerHTML = "100";
             document.getElementById('life-bar').style.width = "100%";
+            document.getElementById('timer').innerHTML = "0s";
+            
             iniciarTimer();
-            falar(`Batalha iniciada! Nível ${curLvl+1}`);
+            falar(`Batalha iniciada! ${conf[curLvl].nome}`);
             rodar();
         }
         
-        // Função check IGUAL ao original (só adiciona voz e ranking)
+        // FUNÇÃO CHECK CORRIGIDA
         function check() {
+            if(!ativo) return;
+            
             let v = parseInt(document.getElementById('ans').value);
+            if(isNaN(v)) {
+                falar("Digite um número válido!");
+                return;
+            }
+            
             if(v === res) {
                 acertos++;
                 document.getElementById('acertos-count').innerHTML = acertos;
@@ -368,32 +450,58 @@
                 mostrarVisual('acerto');
                 canvasConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 
-                // Verifica se completou 5 acertos para avançar (como no original)
-                if(acertos >= 5 && curLvl < 4) {
-                    curLvl++;
-                    vida = 100;
-                    acertos = 0;
-                    document.getElementById('nivel-atual').innerHTML = curLvl+1;
-                    document.getElementById('acertos-count').innerHTML = "0";
-                    document.getElementById('life-bar').style.width = "100%";
-                    document.getElementById('vida-valor').innerHTML = "100";
-                    falar(`Parabéns! Você avançou para o Nível ${curLvl+1}!`);
-                    mostrarVisual('nivel');
-                    canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+                // Verifica se completou 5 acertos para avançar de nível
+                if(acertos >= 5) {
+                    if(curLvl < 4) {
+                        // Avança para o próximo nível
+                        curLvl++;
+                        acertos = 0;
+                        vida = 100;
+                        document.getElementById('nivel-atual').innerHTML = curLvl+1;
+                        document.getElementById('acertos-count').innerHTML = "0";
+                        document.getElementById('life-bar').style.width = "100%";
+                        document.getElementById('vida-valor').innerHTML = "100";
+                        
+                        // Salva o progresso
+                        const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                        if(curLvl > progressoAtual) {
+                            localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
+                        }
+                        
+                        falar(`Parabéns! Você avançou para ${conf[curLvl].nome}!`);
+                        mostrarVisual('nivel');
+                        canvasConfetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+                        rodar();
+                    } else {
+                        // Zerou o jogo!
+                        pararTimer();
+                        const posicao = salvarRanking();
+                        falar(`PARABÉNS! Você completou todos os níveis! Ficou em ${posicao}º lugar no ranking!`);
+                        mostrarVisual('nivel');
+                        canvasConfetti({ particleCount: 500, spread: 150, origin: { y: 0.5 } });
+                        setTimeout(() => {
+                            alert(`🏆 CAMPEÃO! 🏆\nVocê zerou o jogo!\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º lugar`);
+                            location.reload();
+                        }, 2000);
+                        return;
+                    }
+                } else {
+                    rodar();
                 }
-                rodar();
             } else {
                 vida -= 20;
-                document.getElementById('life-bar').style.width = Math.max(0, vida) + "%";
-                document.getElementById('vida-valor').innerHTML = Math.max(0, vida);
-                falar(`Errado! A resposta era ${res}. Perdeu 20 de vida.`);
+                if(vida < 0) vida = 0;
+                
+                document.getElementById('life-bar').style.width = vida + "%";
+                document.getElementById('vida-valor').innerHTML = vida;
+                falar(`Errado! A resposta era ${res}. Perdeu 20 de vida. Restam ${vida}%`);
                 mostrarVisual('erro');
                 
                 if(vida <= 0) { 
                     pararTimer();
                     const posicao = salvarRanking();
                     falar(`Fim de jogo! Você ficou em ${posicao}º lugar no ranking!`);
-                    alert(`Fim de jogo! Pontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º`);
+                    alert(`💀 GAME OVER! 💀\nPontuação: ${calcularPontuacao().pontuacao}\nPosição: ${posicao}º lugar`);
                     location.reload();
                 } else {
                     rodar();
@@ -402,16 +510,21 @@
         }
         
         function sairDoJogo() {
-            if(confirm("Sair e salvar progresso?")) {
+            if(confirm("Tem certeza que quer sair? Seu progresso será salvo!")) {
                 pararTimer();
                 salvarRanking();
-                const progresso = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
-                if(curLvl > progresso) localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
+                
+                // Salva o progresso máximo alcançado
+                const progressoAtual = parseInt(localStorage.getItem('pot_prog_'+nomeJogador)) || 0;
+                if(curLvl > progressoAtual) {
+                    localStorage.setItem('pot_prog_'+nomeJogador, curLvl);
+                }
+                
                 ativo = false;
                 document.getElementById('setup-screen').style.display='block';
                 document.getElementById('game-screen').style.display='none';
                 validarProgresso();
-                falar("Progresso salvo!");
+                falar("Progresso salvo! Até mais!");
             }
         }
         
@@ -419,11 +532,4 @@
         window.onload = () => {
             renderBanners();
             carregarVozes();
-            if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregarVozes;
-            document.getElementById('btn-0').style.background = "#eee";
-        };
-        
-        document.addEventListener('keypress', e => { if(e.key === 'Enter' && document.getElementById('game-screen').style.display === 'block') check(); });
-    </script>
-</body>
-</html>
+            if(synthesis.onvoiceschanged !== undefined) synthesis.onvoiceschanged = carregar
